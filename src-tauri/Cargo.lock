@@ -3,6 +3,22 @@
 version = 4
 
 [[package]]
+name = "Translate"
+version = "0.1.0"
+dependencies = [
+ "calamine",
+ "chrono",
+ "regex",
+ "rust_xlsxwriter",
+ "scraper",
+ "serde",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-dialog",
+ "tauri-plugin-opener",
+]
+
+[[package]]
 name = "addr2line"
 version = "0.24.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4267,22 +4283,6 @@ dependencies = [
  "serde_spanned",
  "toml_datetime",
  "winnow 0.7.4",
-]
-
-[[package]]
-name = "tools"
-version = "0.1.0"
-dependencies = [
- "calamine",
- "chrono",
- "regex",
- "rust_xlsxwriter",
- "scraper",
- "serde",
- "tauri",
- "tauri-build",
- "tauri-plugin-dialog",
- "tauri-plugin-opener",
 ]
 
 [[package]]
