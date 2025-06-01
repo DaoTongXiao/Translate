@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import './App.css';
 import ImageConverter from './components/ImageConverter';
 import ExcelProcessor from './components/ExcelProcessor';
+import JavaScriptExecutor from './components/JavaScriptExecutor';
 import { listen } from '@tauri-apps/api/event';
 
 // 定义应用功能模块接口
@@ -40,6 +41,19 @@ function App() {
         </svg>
       ),
       component: <ExcelProcessor />
+    },
+    {
+      id: 'javascript',
+      name: 'JS执行器',
+      icon: (
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 3H21V21H3V3Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M9 16C9 17.6569 7.65685 19 6 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          <path d="M15 10V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          <path d="M15 10C15 8.34315 16.3431 7 18 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+      ),
+      component: <JavaScriptExecutor />
     }
     // 未来可以在这里添加更多功能模块
   ];
