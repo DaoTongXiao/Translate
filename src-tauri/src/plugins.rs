@@ -117,7 +117,17 @@ fn register_plugin(info: PluginInfo, path: PathBuf) {
 #[tauri::command]
 pub fn get_plugins() -> Vec<(PluginInfo, PluginStatus)> {
     let plugins = PLUGINS.lock().unwrap();
-    plugins.values().cloned().collect()
+    plugins.iter().map(|(_, v)| (v.0.clone(), v.1.clone())).collect()
+}
+
+// 获取单个插件信息
+pub fn get_plugin(plugin_id: &str) -> Result<(PluginInfo, PluginStatus), String> {
+    let plugins = PLUGINS.lock().unwrap();
+    if let Some(plugin) = plugins.get(plugin_id) {
+        Ok((plugin.0.clone(), plugin.1.clone()))
+    } else {
+        Err(format!("插件 {} 不存在", plugin_id))
+    }
 }
 
 // 插件调用 API

@@ -8,9 +8,9 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ProcessResult {
-    success: bool,
-    message: String,
-    output_path: Option<String>,
+    pub success: bool,
+    pub message: String,
+    pub output_path: Option<String>,
 }
 
 fn convert_to_date_string(cell: &str) -> String {
@@ -79,9 +79,9 @@ pub async fn process_excel(input_path: String) -> ProcessResult {
         let mut processed_data: Vec<Vec<String>> = Vec::new();
 
         // 处理每一行
-        for (row_idx, row) in range.rows().enumerate() {
+        for (_row_idx, row) in range.rows().enumerate() {
             let mut processed_row: Vec<String> = Vec::new();
-            for (col_idx, cell) in row.iter().enumerate() {
+            for (_col_idx, cell) in row.iter().enumerate() {
                 let cell_str = cell.to_string();
                 let processed_text = convert_html_to_text(&cell_str);
 
@@ -203,16 +203,6 @@ fn is_likely_date_value(cell_str: &str, cell_value: &calamine::Data) -> bool {
                 }
             }
         },
-        // 对于整数，使用更严格的判断
-        calamine::Data::Int(num) => {
-            let num_f64 = *num as f64;
-            // 整数必须在一个更严格的范围内才可能是日期
-            // 避免将小整数误判为日期
-            if num_f64 >= 36000.0 && num_f64 <= 45000.0 {  // 约1998-2023年
-                return true;
-            }
-        },
-        // 对于字符串，已在前面检查过日期格式
         _ => {}
     }
     

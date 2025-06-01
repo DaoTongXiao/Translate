@@ -1,0 +1,9 @@
+{
+  "name": "excel-processor",
+  "displayName": "Excel处理插件",
+  "version": "1.0.0",
+  "description": "一个用于处理Excel文件的插件，可以选择文件并输出处理结果",
+  "main": "index.js",
+  "author": "用户",
+  "id": "excel-processor"
+}
