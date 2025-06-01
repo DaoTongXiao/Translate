@@ -28,4 +28,7 @@ scraper = "0.23.1"
 rust_xlsxwriter = "0.85.0"
 chrono = "0.4.40"
 regex = "1.11.1"
+image = "0.24.7"
+base64 = "0.21.5"
+ico = "0.3.0"
 
