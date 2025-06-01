@@ -1,0 +1,244 @@
+.plugin-manager {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Microsoft YaHei', sans-serif;
+}
+
+.plugin-manager-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.plugin-manager-header h2 {
+  margin: 0;
+  margin-right: auto;
+  font-size: 1.5rem;
+}
+
+.install-btn, .refresh-btn {
+  padding: 8px 16px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.install-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.refresh-btn {
+  background-color: #2196f3;
+  color: white;
+}
+
+.plugin-list {
+  margin-top: 20px;
+}
+
+.plugin-item {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.plugin-item.loaded {
+  border-left: 4px solid #4caf50;
+}
+
+.plugin-item.error {
+  border-left: 4px solid #f44336;
+}
+
+.plugin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+.plugin-title h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.plugin-version {
+  font-size: 12px;
+  color: #666;
+  margin-left: 5px;
+}
+
+.plugin-author {
+  margin: 5px 0 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.plugin-actions {
+  display: flex;
+}
+
+.execute-btn, .uninstall-btn {
+  padding: 5px 10px;
+  margin-left: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.execute-btn {
+  background-color: #2196f3;
+  color: white;
+}
+
+.uninstall-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.plugin-details {
+  padding: 15px;
+  border-top: 1px solid #eee;
+  background-color: #fff;
+}
+
+.plugin-content {
+  padding: 15px;
+  background-color: #fff;
+}
+
+.plugin-description {
+  margin: 0 0 15px;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.plugin-method {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.method-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.method-row label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+}
+
+.method-row input,
+.method-row textarea {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.method-row textarea {
+  min-height: 80px;
+  resize: vertical;
+  font-family: monospace;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 5px;
+}
+
+.button-group button {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.button-group button:first-child {
+  background-color: #2196f3;
+  color: white;
+}
+
+.button-group button:last-child {
+  background-color: #ff9800;
+  color: white;
+}
+
+.button-group button:hover {
+  opacity: 0.9;
+}
+
+.plugin-error {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  color: #f44336;
+  font-size: 14px;
+}
+
+.loading {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.no-plugins {
+  text-align: center;
+  padding: 30px 0;
+  color: #666;
+}
+
+.result-panel {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+}
+
+.result-panel h3 {
+  margin-top: 0;
+  font-size: 16px;
+}
+
+.error-message {
+  color: #f44336;
+  margin-bottom: 10px;
+}
+
+.result-content {
+  background-color: #fff;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #eee;
+  overflow: auto;
+  max-height: 300px;
+}
+
+.result-content pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+}

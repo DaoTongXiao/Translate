@@ -4,9 +4,12 @@ use std::fs;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
 use std::sync::Mutex;
+use std::collections::HashMap;
 use once_cell::sync::Lazy;
 use temp_dir::TempDir;
-use tauri::AppHandle;
+// use tauri::AppHandle;
+
+use crate::plugin_api;
 
 // 用于存储 JavaScript 执行结果的结构
 #[derive(Debug, Serialize, Deserialize)]
@@ -34,18 +37,13 @@ pub fn initialize_js() {
     }
 }
 
-// 执行 JavaScript 代码
-#[tauri::command]
-pub fn execute_js(code: String) -> JsResult {
+// 内部函数，执行 JavaScript 代码
+pub fn execute_plugin_js(code: String, api_name: Option<String>, api_args: Option<Value>) -> Result<Value, String> {
     // 获取系统 Node.js 路径
     let node_path = match find_nodejs() {
         Some(path) => path,
         None => {
-            return JsResult {
-                success: false,
-                result: Value::Null,
-                error: Some("找不到 Node.js 执行环境".to_string()),
-            };
+            return Err("找不到 Node.js 执行环境".to_string());
         }
     };
     
@@ -61,11 +59,7 @@ pub fn execute_js(code: String) -> JsResult {
                     temp_dir_guard.as_ref().unwrap().path().to_path_buf()
                 },
                 Err(e) => {
-                    return JsResult {
-                        success: false,
-                        result: Value::Null,
-                        error: Some(format!("创建临时目录失败: {}", e)),
-                    };
+                    return Err(format!("创建临时目录失败: {}", e));
                 }
             }
         }
@@ -74,6 +68,91 @@ pub fn execute_js(code: String) -> JsResult {
     let js_file = temp_dir.join("script.js");
     
     // 写入 JavaScript 代码到文件
+    if let Err(e) = fs::write(&js_file, code) {
+        return Err(format!("写入临时 JS 文件失败: {}", e));
+    }
+    
+    // 创建环境变量，用于 API 调用
+    let mut env_vars = HashMap::new();
+    
+    // 如果有 API 调用，处理 API 结果
+    if let (Some(name), Some(args)) = (api_name, api_args) {
+        // 调用 API 并获取结果
+        match plugin_api::call_api(&name, args) {
+            Ok(result) => {
+                // 将 API 结果序列化为 JSON 字符串并设置为环境变量
+                if let Ok(result_json) = serde_json::to_string(&result) {
+                    env_vars.insert("APP_API_RESULT".to_string(), result_json);
+                } else {
+                    env_vars.insert("APP_API_RESULT".to_string(), "{\"error\":\"API 结果序列化失败\"}".to_string());
+                }
+            },
+            Err(e) => {
+                // API 调用失败，返回错误信息
+                env_vars.insert("APP_API_RESULT".to_string(), 
+                    format!("{{\"error\":\"API 调用失败: {}\"}}", e));
+            }
+        }
+    } else {
+        // 没有 API 调用，设置空结果
+        env_vars.insert("APP_API_RESULT".to_string(), "{}".to_string());
+    }
+    
+    // 执行 Node.js 脚本
+    let output = match Command::new(&node_path)
+        .arg(&js_file)
+        .envs(&env_vars)
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .output() {
+        Ok(output) => output,
+        Err(e) => {
+            return Err(format!("执行 Node.js 失败: {}", e));
+        }
+    };
+    
+    // 解析输出
+    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+    
+    if !output.status.success() {
+        return Err(format!("Node.js 执行错误: {}", stderr));
+    }
+    
+    // 尝试解析 JSON 输出
+    let result: serde_json::Result<serde_json::Value> = serde_json::from_str(&stdout);
+    match result {
+        Ok(value) => {
+            if let Some(obj) = value.as_object() {
+                if let Some(success) = obj.get("success") {
+                    if success.as_bool() == Some(true) {
+                        if let Some(result) = obj.get("result") {
+                            return Ok(result.clone());
+                        }
+                    } else if let Some(error) = obj.get("error") {
+                        if let Some(err_str) = error.as_str() {
+                            return Err(err_str.to_string());
+                        }
+                    }
+                }
+            }
+            Ok(value)
+        },
+        Err(_) => {
+            // 如果无法解析为 JSON，则返回原始输出
+            if !stderr.is_empty() {
+                Err(stderr)
+            } else {
+                Ok(Value::String(stdout))
+            }
+        }
+    }
+}
+
+// 执行 JavaScript 代码
+#[tauri::command]
+pub fn execute_js(code: String) -> JsResult {
+    // 将用户代码包装在函数中执行
     let wrapper_code = format!(r#"try {{
   const result = (function() {{ 
     {};
@@ -84,61 +163,18 @@ pub fn execute_js(code: String) -> JsResult {
 }}
 "#, code);
     
-    if let Err(e) = fs::write(&js_file, wrapper_code) {
-        return JsResult {
+    // 使用内部函数执行
+    match execute_plugin_js(wrapper_code, None, None) {
+        Ok(result) => JsResult {
+            success: true,
+            result,
+            error: None,
+        },
+        Err(err) => JsResult {
             success: false,
             result: Value::Null,
-            error: Some(format!("写入临时 JS 文件失败: {}", e)),
-        };
-    }
-    
-    // 执行 Node.js 脚本
-    let output = match Command::new(&node_path)
-        .arg(&js_file)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .output() {
-        Ok(output) => output,
-        Err(e) => {
-            return JsResult {
-                success: false,
-                result: Value::Null,
-                error: Some(format!("执行 Node.js 失败: {}", e)),
-            };
-        }
-    };
-    
-    // 解析输出
-    let stdout = String::from_utf8_lossy(&output.stdout).to_string();
-    let stderr = String::from_utf8_lossy(&output.stderr).to_string();
-    
-    if !output.status.success() {
-        return JsResult {
-            success: false,
-            result: Value::Null,
-            error: Some(format!("Node.js 执行错误: {}", stderr)),
-        };
-    }
-    
-    // 尝试解析 JSON 输出
-    match serde_json::from_str::<JsResult>(&stdout) {
-        Ok(result) => result,
-        Err(_) => {
-            // 如果无法解析为 JSON，则返回原始输出
-            if !stderr.is_empty() {
-                JsResult {
-                    success: false,
-                    result: Value::Null,
-                    error: Some(stderr),
-                }
-            } else {
-                JsResult {
-                    success: true,
-                    result: Value::String(stdout),
-                    error: None,
-                }
-            }
-        }
+            error: Some(err),
+        },
     }
 }
 

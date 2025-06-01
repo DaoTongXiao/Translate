@@ -1,10 +1,15 @@
 mod excel;
-mod image_converter;
-mod javascript;
+pub mod image_converter;
+pub mod javascript;
+pub mod plugin_api;
+pub mod plugins;
 
 use excel::process_excel;
 use image_converter::convert_to_ico;
 use javascript::{execute_js, initialize_js};
+use plugin_api::plugin_call_api;
+use plugins::{initialize_plugins, get_plugins, execute_plugin_method, install_plugin, uninstall_plugin, plugin_api_call};
+use std::path::PathBuf;
 use tauri::{AppHandle, Manager, Emitter};
 use tauri::menu::{MenuBuilder, MenuEvent, SubmenuBuilder, MenuItemBuilder};
 
@@ -203,11 +208,33 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
         .setup(|app| {
+            // 创建菜单
             create_menu(app)?;
+            
+            // 初始化插件系统
+            let app_dir = app.path().app_data_dir().unwrap_or_else(|_| PathBuf::from("."));
+            if let Err(e) = initialize_plugins(&app_dir) {
+                eprintln!("初始化插件系统失败: {}", e);
+            }
+            
+            // 初始化插件 API
+            plugin_api::initialize_plugin_api(app.handle().clone());
+            
             Ok(())
         })
         .on_menu_event(handle_menu_event)
-        .invoke_handler(tauri::generate_handler![process_excel, convert_to_ico, open_file, execute_js])
+        .invoke_handler(tauri::generate_handler![
+            process_excel, 
+            convert_to_ico, 
+            open_file, 
+            execute_js,
+            get_plugins,
+            execute_plugin_method,
+            install_plugin,
+            uninstall_plugin,
+            plugin_api_call,
+            plugin_call_api
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
