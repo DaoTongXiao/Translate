@@ -1,15 +1,11 @@
-// use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::sync::Mutex;
 use once_cell::sync::Lazy;
 use tauri::AppHandle;
-use tauri::async_runtime;
 use std::path::Path;
 use std::fs;
 use tauri_plugin_dialog::DialogExt;
-
-use crate::excel;
 
 // 注册的 API 函数集合
 static API_REGISTRY: Lazy<Mutex<HashMap<String, Box<dyn Fn(Value) -> Result<Value, String> + Send + Sync>>>> = 
@@ -40,7 +36,7 @@ pub fn initialize_plugin_api(app_handle: AppHandle) {
     // 在函数开始就克隆 app_handle
     let app_handle_file = app_handle.clone();
     let app_handle_notification = app_handle.clone();
-    let app_handle_image = app_handle.clone();
+    let app_handle_fs = app_handle.clone();
     
     // 注册文件对话框 API
     register_api("openFileDialog", move |args| {
@@ -99,6 +95,36 @@ pub fn initialize_plugin_api(app_handle: AppHandle) {
         }
     });
     
+    // 注册文件夹选择对话框 API
+    let app_handle_folder = app_handle.clone();
+    register_api("openFolderDialog", move |args| {
+        let title = args.get("title").and_then(|v| v.as_str()).unwrap_or("选择文件夹");
+        
+        // 使用 Tauri 的文件对话框，设置为文件夹选择模式
+        let app_handle_clone = app_handle_folder.clone();
+        let (sender, receiver) = std::sync::mpsc::channel();
+        
+        // 创建文件对话框并配置为文件夹选择模式
+        let dialog_builder = app_handle_clone.dialog().file();
+        
+        // 设置标题
+        let dialog_builder = dialog_builder.set_title(title);
+        
+        // 调用pick_folder方法选择文件夹
+        let sender_clone = sender.clone();
+        dialog_builder.pick_folder(move |folder_path| {
+            let _ = sender_clone.send(folder_path);
+        });
+        
+        // 等待用户选择文件夹
+        let result = receiver.recv().unwrap_or(None);
+        
+        match result {
+            Some(path) => Ok(Value::String(path.to_string())),
+            None => Ok(Value::Null),
+        }
+    });
+    
     // 注册消息通知 API
     register_api("showNotification", move |args| {
         let title = args.get("title").and_then(|v| v.as_str()).unwrap_or("通知");
@@ -113,87 +139,74 @@ pub fn initialize_plugin_api(app_handle: AppHandle) {
         Ok(Value::Bool(true))
     });
     
-    // 注册图片转换 API
-    register_api("convertImage", move |args| {
-        let source_path = args.get("sourcePath").and_then(|v| v.as_str()).unwrap_or("");
-        let target_format = args.get("targetFormat").and_then(|v| v.as_str()).unwrap_or("png");
+    // 注册文件读取 API
+    register_api("readFile", move |args| {
+        let file_path = args.get("path").and_then(|v| v.as_str());
         
-        println!("转换图片: {} -> {}", source_path, target_format);
-        
-        Ok(Value::String(format!("{}.{}", source_path, target_format)))
-    });
-    
-    // 注册获取系统信息 API
-    register_api("getSystemInfo", move |_| {
-        let info = serde_json::json!({
-            "os": std::env::consts::OS,
-            "arch": std::env::consts::ARCH,
-            "version": env!("CARGO_PKG_VERSION"),
-            "timestamp": chrono::Local::now().to_rfc3339(),
-        });
-        
-        Ok(info)
-    });
-    
-    // 注册处理 Excel 文件 API
-    register_api("processExcel", move |args| {
-        let input_file = match args.get("inputFile").and_then(|v| v.as_str()) {
-            Some(path) => path,
-            None => return Err("缺少输入文件路径".to_string())
-        };
-        
-        let output_file = args.get("outputFile").and_then(|v| v.as_str()).unwrap_or("");
-        let options = args.get("options").and_then(|v| v.as_object());
-        
-        // 如果没有指定输出文件，生成默认输出路径
-        let output_path = if output_file.is_empty() {
-            let input_path = Path::new(input_file);
-            let parent = input_path.parent().unwrap_or(Path::new(""));
-            let stem = input_path.file_stem().unwrap_or_default().to_string_lossy();
-            let ext = input_path.extension().unwrap_or_default().to_string_lossy();
-            format!("{}/{}_processed.{}", parent.display(), stem, ext)
-        } else {
-            output_file.to_string()
-        };
-        
-        // 判断是否要转换为 CSV
-        let format = options.and_then(|o| o.get("format")).and_then(|v| v.as_str()).unwrap_or("");
-        if format == "csv" {
-            // 处理为 CSV
-            match process_excel_to_csv(input_file, &output_path, options) {
-                Ok(_) => Ok(serde_json::json!({
-                    "success": true,
-                    "outputFile": output_path
-                })),
-                Err(e) => Err(format!("Excel 转换为 CSV 失败: {}", e))
+        if let Some(path) = file_path {
+            match fs::read_to_string(path) {
+                Ok(content) => Ok(Value::String(content)),
+                Err(e) => Err(format!("读取文件失败: {}", e))
             }
         } else {
-            // 正常处理 Excel
-            match process_excel_file(input_file, &output_path, options) {
-                Ok(_) => Ok(serde_json::json!({
-                    "success": true,
-                    "outputFile": output_path
-                })),
-                Err(e) => Err(format!("Excel 处理失败: {}", e))
-            }
+            Err("未指定文件路径".to_string())
         }
     });
     
-    // 注册合并 Excel 文件 API
-    register_api("mergeExcelFiles", move |args| {
-        let output_file = match args.get("outputFile").and_then(|v| v.as_str()) {
-            Some(path) => path,
-            None => return Err("缺少输出文件路径".to_string())
-        };
+    // 注册文件写入 API
+    register_api("writeFile", move |args| {
+        let file_path = args.get("path").and_then(|v| v.as_str());
+        let content = args.get("content").and_then(|v| v.as_str()).unwrap_or("");
         
-        // 模拟合并成功
-        Ok(serde_json::json!({
-            "success": true,
-            "message": "Excel 文件合并成功",
-            "outputFile": output_file
-        }))
+        if let Some(path) = file_path {
+            match fs::write(path, content) {
+                Ok(_) => Ok(Value::Bool(true)),
+                Err(e) => Err(format!("写入文件失败: {}", e))
+            }
+        } else {
+            Err("未指定文件路径".to_string())
+        }
     });
     
+    // 注册获取文件信息 API
+    register_api("getFileInfo", move |args| {
+        let file_path = args.get("path").and_then(|v| v.as_str());
+        
+        if let Some(path) = file_path {
+            let path_obj = Path::new(path);
+            if !path_obj.exists() {
+                return Err(format!("文件不存在: {}", path));
+            }
+            
+            let metadata = match fs::metadata(path) {
+                Ok(meta) => meta,
+                Err(e) => return Err(format!("获取文件信息失败: {}", e))
+            };
+            
+            let file_name = path_obj.file_name()
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_default();
+                
+            let extension = path_obj.extension()
+                .map(|e| e.to_string_lossy().to_string())
+                .unwrap_or_default();
+                
+            let info = serde_json::json!({
+                "name": file_name,
+                "path": path,
+                "size": metadata.len(),
+                "isDirectory": metadata.is_dir(),
+                "isFile": metadata.is_file(),
+                "extension": extension,
+                "lastModified": metadata.modified().ok().map(|t| t.duration_since(std::time::SystemTime::UNIX_EPOCH).unwrap_or_default().as_secs())
+            });
+            
+            Ok(info)
+        } else {
+            Err("未指定文件路径".to_string())
+        }
+    });
+
     // 注册获取剪贴板内容 API
     register_api("getClipboardText", move |_| {
         // 模拟实现，实际应该调用系统剪贴板 API
@@ -207,55 +220,102 @@ pub fn initialize_plugin_api(app_handle: AppHandle) {
         
         Ok(Value::Bool(true))
     });
+    
+    // 注册获取系统信息 API
+    register_api("getSystemInfo", move |_| {
+        let info = serde_json::json!({
+            "os": std::env::consts::OS,
+            "arch": std::env::consts::ARCH,
+            "version": env!("CARGO_PKG_VERSION"),
+            "timestamp": chrono::Local::now().to_rfc3339(),
+        });
+        
+        Ok(info)
+    });
 }
 
-// 处理 Excel 文件的内部函数
-fn process_excel_file(input_path: &str, output_path: &str, _options: Option<&serde_json::Map<String, Value>>) -> Result<(), String> {
-    // 调用应用的 Excel 处理功能
-    let result = async_runtime::block_on(excel::process_excel(input_path.to_string()));
+// 执行插件函数 - 通用的插件执行器
+pub fn execute_plugin_function(plugin_id: &str, function_name: &str, args: Value) -> Result<Value, String> {
+    // 获取插件信息
+    let (plugin_info, _) = crate::plugins::get_plugin(plugin_id)?;
     
-    if !result.success {
-        return Err(result.message);
-    }
+    // 构建函数调用代码
+    let js_code = format!(
+        "const plugin = require('./{}')\
+        ;\
+        if (typeof plugin.{} !== 'function') {{\
+            throw new Error('Function {} not found in plugin');\
+        }}\
+        return plugin.{}({})",
+        plugin_info.main,
+        function_name,
+        function_name,
+        function_name,
+        args.to_string()
+    );
     
-    // 如果有输出路径，将文件复制到指定路径
-    if let Some(src_path) = result.output_path {
-        if src_path != output_path {
-            fs::copy(src_path, output_path)
-                .map_err(|e| format!("复制文件失败: {}", e))?;
-        }
-    }
+    // 执行插件的 JavaScript 代码
+    let result = crate::javascript::execute_plugin_js(js_code, Some(plugin_id.to_string()), None)?;
     
-    Ok(())
+    Ok(result)
 }
 
-// 将 Excel 转换为 CSV 的内部函数
-fn process_excel_to_csv(input_path: &str, output_path: &str, _options: Option<&serde_json::Map<String, Value>>) -> Result<(), String> {
-    // 这里应该调用将 Excel 转换为 CSV 的功能
-    // 目前我们使用现有的 Excel 处理功能并将结果保存为 CSV
+// 获取插件导出的所有函数
+pub fn get_plugin_exports(plugin_id: &str) -> Result<Vec<String>, String> {
+    // 获取插件信息
+    let (plugin_info, _) = crate::plugins::get_plugin(plugin_id)?;
     
-    // 先处理 Excel
-    let result = async_runtime::block_on(excel::process_excel(input_path.to_string()));
+    // 构建代码以获取插件导出的所有函数
+    let js_code = format!(
+        "const plugin = require('{}');\
+        const exports = [];\
+        for (const key in plugin) {{\
+            if (typeof plugin[key] === 'function') {{\
+                exports.push(key);\
+            }}\
+        }}\
+        return exports;",
+        plugin_info.main
+    );
     
-    if !result.success {
-        return Err(result.message);
-    }
+    // 执行 JavaScript 代码
+    let result = crate::javascript::execute_plugin_js(js_code, Some(plugin_id.to_string()), None)?;
     
-    // 模拟将结果保存为 CSV
-    // 实际应用中应该实现真正的 CSV 转换
-    let dummy_content = "This is a CSV file converted from Excel";
-    fs::write(output_path, dummy_content)
-        .map_err(|e| format!("写入 CSV 文件失败: {}", e))?;
+    // 解析结果为字符串数组
+    let exports: Vec<String> = serde_json::from_value(result)
+        .map_err(|e| format!("解析插件导出失败: {}", e))?;
     
-    Ok(())
+    Ok(exports)
 }
 
 // 插件调用 API 的命令
 #[tauri::command]
 pub fn plugin_call_api(plugin_id: String, api_name: String, args: Value) -> Result<Value, String> {
-    // 检查插件是否存在
-    crate::plugins::get_plugin(&plugin_id).map_err(|e| format!("插件调用API失败: {}", e))?;
+    // 特殊处理：当plugin_id为"system"时，不检查插件是否存在
+    // 这允许直接调用系统API而不需要特定插件
+    if plugin_id != "system" {
+        // 检查插件是否存在
+        crate::plugins::get_plugin(&plugin_id).map_err(|e| format!("插件调用API失败: {}", e))?;
+    }
     
     // 调用 API
     call_api(&api_name, args)
+}
+
+#[tauri::command]
+pub fn plugin_execute_function(plugin_id: String, function_name: String, args: Value) -> Result<Value, String> {
+    execute_plugin_function(&plugin_id, &function_name, args)
+}
+
+// 获取插件导出函数的命令
+#[tauri::command]
+pub fn plugin_get_exports(plugin_id: String) -> Result<Vec<String>, String> {
+    get_plugin_exports(&plugin_id)
+}
+
+// 列出所有可用的 API 函数
+#[tauri::command]
+pub fn list_available_apis() -> Vec<String> {
+    let registry = API_REGISTRY.lock().unwrap();
+    registry.keys().cloned().collect()
 }

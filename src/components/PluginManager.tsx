@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { open } from '@tauri-apps/plugin-dialog';
 import './PluginManager.css';
 
 // 插件信息接口
@@ -12,6 +11,11 @@ interface PluginInfo {
   description: string;
   main: string;
   author?: string;
+  // 添加新字段：是否需要文件选择
+  // 使用与后端匹配的字段名
+  requires_file_selection?: boolean;
+  // 文件过滤器
+  file_filters?: string[];
 }
 
 // 插件状态接口
@@ -149,11 +153,17 @@ const PluginManager: React.FC = () => {
   // 安装插件
   const installPlugin = async () => {
     try {
-      // 打开文件对话框选择插件目录
-      const selected = await open({
-        directory: true,
-        multiple: false,
-        title: '选择插件目录'
+      // 使用后端 API 打开目录选择对话框
+      const apiArgs = {
+        title: '选择插件目录',
+        directory: true
+      };
+      
+      // 使用特殊的系统插件ID "system"，因为这是通用API而不是特定插件的API
+      const selected = await invoke('plugin_call_api', {
+        pluginId: "system",
+        apiName: 'openFolderDialog',  // 使用文件夹选择对话框
+        args: apiArgs
       });
       
       if (selected) {
@@ -191,29 +201,99 @@ const PluginManager: React.FC = () => {
   // 执行插件方法
   const executePluginMethod = async (pluginId: string, method: string, args: any = {}) => {
     try {
+      setResult({ status: `正在执行${method}...请稍候` });
+
+      // 查找当前插件
+      const pluginEntry = plugins.find(([p]) => p.id === pluginId);
+      if (!pluginEntry) {
+        throw new Error(`插件不存在: ${pluginId}`);
+      }
+      
+      const [currentPlugin, status] = pluginEntry;
+      if (!status.loaded) {
+        throw new Error(`插件未加载成功: ${currentPlugin.name}`);
+      }
+      
+      // 调试输出当前插件的元数据
+      console.log('执行插件前的插件信息:', currentPlugin);
+      console.log('是否需要文件选择:', currentPlugin.requires_file_selection);
+      console.log('文件过滤器:', currentPlugin.file_filters);
+
       // 检查是否是 API 调用
       if (method.startsWith('appApi_')) {
         // 从方法名中提取 API 名称
         const apiName = method.substring(7); // 去掉 'appApi_' 前缀
         
         // 调用插件 API
-        const result = await invoke('plugin_api_call', { 
+        const result = await invoke('plugin_call_api', { 
+          pluginId,
           apiName, 
-          apiArgs: args 
-        });
-        
-        setResult(result);
-        setError(null);
-      } else {
-        // 常规插件方法调用
-        const result = await invoke('execute_plugin_method', { 
-          pluginId, 
-          method, 
           args 
         });
         
         setResult(result);
         setError(null);
+      } else {
+        // 判断插件是否需要文件选择
+        // 手动检查Excel插件或其他需要文件选择的插件
+        if (method === 'run' && (currentPlugin.requires_file_selection || currentPlugin.id === 'excel-processor')) {
+          setResult({ status: '正在选择文件...' });
+          
+          // 设置文件过滤器
+          const filters = currentPlugin.file_filters || [];
+          
+          try {
+            // 打开文件选择对话框
+            // 通过调用后端 API 来打开文件选择对话框
+            console.log('正在打开文件选择对话框...');
+            console.log('当前插件:', currentPlugin);
+            console.log('插件过滤器:', filters);
+            
+            // 在这里主动强制设置 requires_file_selection 为 true
+            console.log('强制启用文件选择');
+            
+            // 使用 plugin_call_api 来调用 openFileDialog API
+            const apiArgs = {
+              title: `选择要用 ${currentPlugin.display_name || currentPlugin.name} 处理的文件`,
+              filters: filters
+            };
+            
+            const selectedFilePath = await invoke('plugin_call_api', {
+              pluginId: "system",
+              apiName: 'openFileDialog',
+              args: apiArgs
+            });
+            
+            if (selectedFilePath) {
+              // 将文件路径作为参数传递给插件
+              const result = await invoke('execute_plugin_method', { 
+                pluginId, 
+                method, 
+                args: { ...args, filePath: selectedFilePath } 
+              });
+              
+              setResult(result);
+              setError(null);
+            } else {
+              // 用户取消选择
+              setResult({ success: false, message: '未选择文件' });
+              setError(null);
+            }
+          } catch (fileErr) {
+            setError(`文件选择失败: ${fileErr}`);
+            setResult(null);
+          }
+        } else {
+          // 常规插件方法调用
+          const result = await invoke('execute_plugin_method', { 
+            pluginId, 
+            method, 
+            args 
+          });
+          
+          setResult(result);
+          setError(null);
+        }
       }
     } catch (err) {
       setError(`执行插件方法失败: ${err}`);

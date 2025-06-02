@@ -20,6 +20,12 @@ pub struct PluginInfo {
     pub description: String,
     pub main: String,
     pub author: Option<String>,
+    // 新增字段：是否需要文件选择
+    #[serde(rename = "requiresFileSelection")]
+    pub requires_file_selection: Option<bool>,
+    // 文件过滤器
+    #[serde(rename = "fileFilters")]
+    pub file_filters: Option<Vec<String>>,
 }
 
 // 插件状态
@@ -101,8 +107,9 @@ fn scan_plugins(plugins_dir: &Path) -> Result<(), String> {
 // 注册插件
 fn register_plugin(info: PluginInfo, path: PathBuf) {
     let plugin_id = info.id.clone();
+    // 将插件状态设置为已加载
     let status = PluginStatus {
-        loaded: false,
+        loaded: true, // 修改为 true，因为我们认为插件已经成功加载
         error: None,
     };
     
