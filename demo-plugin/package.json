@@ -1,9 +1,14 @@
 {
   "name": "demo-plugin",
   "id": "demo-plugin",
-  "displayName": "演示插件",
+  "displayName": "JS转TXX插件",
   "version": "1.0.0",
-  "description": "演示如何使用应用 API 的插件",
+  "description": "读取JavaScript文件并转换为TXX格式",
   "main": "index.js",
-  "author": "Cascade"
+  "author": "Cascade",
+  "requiresFileSelection": true,
+  "fileFilters": [".js", ".jsx"],
+  "requiresOutputFileSelection": true,
+  "outputFileFilters": [".txt"],
+  "defaultOutputFileName": "converted.txt"
 }

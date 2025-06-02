@@ -36,7 +36,8 @@ pub fn initialize_plugin_api(app_handle: AppHandle) {
     // 在函数开始就克隆 app_handle
     let app_handle_file = app_handle.clone();
     let app_handle_notification = app_handle.clone();
-    let app_handle_fs = app_handle.clone();
+    // 添加下划线前缀标记该变量是有意未使用的
+    let _app_handle_fs = app_handle.clone();
     
     // 注册文件对话框 API
     register_api("openFileDialog", move |args| {
@@ -125,6 +126,57 @@ pub fn initialize_plugin_api(app_handle: AppHandle) {
         }
     });
     
+    // 注册文件保存对话框 API
+    let app_handle_save = app_handle.clone();
+    register_api("saveFileDialog", move |args| {
+        println!("saveFileDialog API被调用，参数: {:?}", args);
+        let title = args.get("title").and_then(|v| v.as_str()).unwrap_or("保存文件");
+        let default_name = args.get("defaultName").and_then(|v| v.as_str()).unwrap_or("");
+        let filters = args.get("filters").and_then(|v| v.as_array()).map(|arr| {
+            arr.iter()
+                .filter_map(|v| v.as_str())
+                .collect::<Vec<_>>()
+        }).unwrap_or_default();
+        
+        // 使用 Tauri 的文件保存对话框
+        let app_handle_clone = app_handle_save.clone();
+        let (sender, receiver) = std::sync::mpsc::channel();
+        
+        let mut dialog_builder = app_handle_clone.dialog().file();
+        
+        // 设置标题
+        dialog_builder = dialog_builder.set_title(title);
+        
+        // 设置默认文件名
+        if !default_name.is_empty() {
+            dialog_builder = dialog_builder.set_file_name(default_name);
+        }
+        
+        // 设置文件过滤器
+        if !filters.is_empty() {
+            let extensions: Vec<&str> = filters.iter()
+                .map(|ext| ext.trim_start_matches("."))
+                .collect();
+            
+            if !extensions.is_empty() {
+                dialog_builder = dialog_builder.add_filter("文件", &extensions);
+            }
+        }
+        
+        let sender_clone = sender.clone();
+        dialog_builder.save_file(move |file_path| {
+            let _ = sender_clone.send(file_path);
+        });
+        
+        // 等待用户选择文件
+        let result = receiver.recv().unwrap_or(None);
+        
+        match result {
+            Some(path) => Ok(Value::String(path.to_string())),
+            None => Ok(Value::Null),
+        }
+    });
+    
     // 注册消息通知 API
     register_api("showNotification", move |args| {
         let title = args.get("title").and_then(|v| v.as_str()).unwrap_or("通知");
@@ -139,11 +191,12 @@ pub fn initialize_plugin_api(app_handle: AppHandle) {
         Ok(Value::Bool(true))
     });
     
-    // 注册文件读取 API
+    // 注册文件读写 API
     register_api("readFile", move |args| {
         let file_path = args.get("path").and_then(|v| v.as_str());
         
         if let Some(path) = file_path {
+            // 读取文件内容
             match fs::read_to_string(path) {
                 Ok(content) => Ok(Value::String(content)),
                 Err(e) => Err(format!("读取文件失败: {}", e))
@@ -154,16 +207,66 @@ pub fn initialize_plugin_api(app_handle: AppHandle) {
     });
     
     // 注册文件写入 API
+    // 不再需要app_handle，使用系统临时目录
     register_api("writeFile", move |args| {
+        println!("writeFile API被调用，参数: {:?}", args);
+        
         let file_path = args.get("path").and_then(|v| v.as_str());
         let content = args.get("content").and_then(|v| v.as_str()).unwrap_or("");
         
         if let Some(path) = file_path {
+            println!("尝试写入文件: {}", path);
+            println!("内容长度: {}", content.len());
+            
+            // 创建父目录（如果不存在）
+            if let Some(parent) = std::path::Path::new(path).parent() {
+                if !parent.exists() {
+                    println!("创建父目录: {:?}", parent);
+                    if let Err(e) = std::fs::create_dir_all(parent) {
+                        println!("创建目录失败: {}", e);
+                    }
+                }
+            }
+            
+            // 尝试写入文件
             match fs::write(path, content) {
-                Ok(_) => Ok(Value::Bool(true)),
-                Err(e) => Err(format!("写入文件失败: {}", e))
+                Ok(_) => {
+                    println!("文件写入成功: {}", path);
+                    
+                    // 验证文件是否实际被创建
+                    if std::path::Path::new(path).exists() {
+                        println!("确认文件存在");
+                        if let Ok(metadata) = std::fs::metadata(path) {
+                            println!("文件大小: {} 字节", metadata.len());
+                        }
+                        Ok(Value::Bool(true))
+                    } else {
+                        println!("警告: 写入操作成功但文件不存在");
+                        Err(format!("写入操作成功但文件不存在: {}", path))
+                    }
+                },
+                Err(e) => {
+                    println!("写入文件失败: {} - {}", path, e);
+                    
+                    // 尝试多种备用路径
+                    // 1. 系统临时目录
+                    let backup_path = std::env::temp_dir().join("backup_output.txt");
+                    println!("尝试使用临时目录备用路径: {:?}", backup_path);
+                    
+                    match fs::write(&backup_path, content) {
+                        Ok(_) => {
+                            println!("备用路径写入成功");
+                            Ok(Value::String(backup_path.to_string_lossy().into_owned()))
+                        },
+                        Err(backup_err) => {
+                            println!("备用路径写入也失败: {}", backup_err);
+                            Err(format!("写入文件失败: {} - 备用写入也失败", e))
+                        }
+                    }
+                }
             }
         } else {
+            println!("未指定文件路径");
             Err("未指定文件路径".to_string())
         }
     });

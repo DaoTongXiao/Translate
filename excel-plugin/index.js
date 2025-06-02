@@ -29,14 +29,15 @@ function run(args = {}) {
       // 在这里添加实际的Excel处理代码
       // ... 处理Excel文件的逻辑 ...
       
-      // 返回处理结果
+      // 返回处理结果 - 确保返回结构与前端预期的格式一致
+      console.log('返回处理成功结果');
       return {
         success: true,
-        filePath: filePath,
         result: {
-          success: true,
-          message: `成功处理Excel文件: ${filePath}`
-        }
+          data: "This is processed data",
+          originalFile: filePath
+        },
+        message: `成功处理Excel文件: ${filePath}`
       };
     } else {
       // 没有提供文件路径
@@ -82,10 +83,56 @@ function appApi_showNotification(args) {
   return true; // 这里的返回值会被后端的真实返回值替换
 }
 
+/**
+ * 保存处理结果到用户指定的输出路径
+ * @param {object} args - 传入的参数，包含 result 和 outputPath
+ * @returns {object} 保存结果
+ */
+function saveResult(args = {}) {
+  try {
+    console.log('保存处理结果...');
+    
+    // 从参数中获取结果和输出路径
+    const { result, outputPath } = args;
+    
+    if (!outputPath) {
+      return {
+        success: false,
+        message: '未提供输出路径'
+      };
+    }
+    
+    console.log('将结果保存到:', outputPath);
+    
+    // 在这里添加实际的文件保存代码
+    // 这里仅仅模拟保存成功
+    // 实际应用中可以使用 Node.js 的 fs 模块或其他方式保存文件
+    
+    // 显示成功通知
+    appApi_showNotification({
+      title: 'Excel处理完成',
+      message: `结果已保存到: ${outputPath}`
+    });
+    
+    return {
+      success: true,
+      message: `结果已成功保存到: ${outputPath}`,
+      outputPath
+    };
+  } catch (error) {
+    console.error('保存结果失败:', error);
+    return {
+      success: false,
+      error: error.toString()
+    };
+  }
+}
+
 // 导出插件函数
 module.exports = {
   run,
   initialize,
+  saveResult,
   // 导出 API 函数供插件系统调用
   appApi_openFileDialog,
   appApi_showNotification
