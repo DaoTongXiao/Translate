@@ -1,9 +1,0 @@
-{
-  "name": "demo-plugin",
-  "id": "demo-plugin",
-  "displayName": "演示插件",
-  "version": "1.0.0",
-  "description": "演示如何使用应用 API 的插件",
-  "main": "index.js",
-  "author": "Cascade"
-}

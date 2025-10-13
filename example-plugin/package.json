@@ -1,9 +1,0 @@
-{
-  "name": "example-translator",
-  "displayName": "示例翻译插件",
-  "version": "1.0.0",
-  "description": "一个简单的翻译插件示例，展示如何开发Tauri应用的JavaScript插件",
-  "main": "index.js",
-  "author": "示例作者",
-  "id": "example-translator"
-}
