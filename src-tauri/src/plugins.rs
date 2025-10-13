@@ -20,6 +20,21 @@ pub struct PluginInfo {
     pub description: String,
     pub main: String,
     pub author: Option<String>,
+    // 新增字段：是否需要文件选择
+    #[serde(rename = "requiresFileSelection")]
+    pub requires_file_selection: Option<bool>,
+    // 文件过滤器
+    #[serde(rename = "fileFilters")]
+    pub file_filters: Option<Vec<String>>,
+    // 新增字段：是否需要选择输出文件
+    #[serde(rename = "requiresOutputFileSelection")]
+    pub requires_output_file_selection: Option<bool>,
+    // 输出文件过滤器
+    #[serde(rename = "outputFileFilters")]
+    pub output_file_filters: Option<Vec<String>>,
+    // 默认输出文件名
+    #[serde(rename = "defaultOutputFileName")]
+    pub default_output_file_name: Option<String>,
 }
 
 // 插件状态
@@ -101,8 +116,9 @@ fn scan_plugins(plugins_dir: &Path) -> Result<(), String> {
 // 注册插件
 fn register_plugin(info: PluginInfo, path: PathBuf) {
     let plugin_id = info.id.clone();
+    // 将插件状态设置为已加载
     let status = PluginStatus {
-        loaded: false,
+        loaded: true, // 修改为 true，因为我们认为插件已经成功加载
         error: None,
     };
     
@@ -165,14 +181,162 @@ pub fn execute_plugin_method(plugin_id: String, method: String, args: Value) -> 
         return Err(format!("插件主文件不存在: {:?}", main_file));
     }
     
-    // 创建执行代码，包含 API 桥接
+    // 准备直接实现的基本 API函数实现
+    let node_api_functions = format!(
+        r#"
+        // 这里实现常用的Node.js API函数
+        const fs = require('fs');
+        const path = require('path');
+        
+        // 实现基本的API函数
+        const nodeApiImpl = {{
+            // 读取文件API
+            readFile: function(args) {{
+                try {{
+                    if (!args || !args.path) throw new Error('未指定文件路径');
+                    console.log('直接读取文件:', args.path);
+                    return fs.readFileSync(args.path, args.encoding || 'utf8');
+                }} catch (err) {{
+                    console.error('读取文件失败:', err.message);
+                    throw new Error(`读取文件失败: ${{err.message}}`);
+                }}
+            }},
+            
+            // 写入文件API
+            writeFile: function(args) {{
+                try {{
+                    if (!args || !args.path) throw new Error('未指定文件路径');
+                    if (args.content === undefined) throw new Error('未指定文件内容');
+                    
+                    // 规范化路径
+                    const filePath = path.normalize(args.path);
+                    console.log('写入文件路径:', filePath);
+                    console.log('内容长度:', args.content.length);
+                    
+                    // 创建父目录
+                    try {{
+                        const dirPath = path.dirname(filePath);
+                        if (!fs.existsSync(dirPath)) {{
+                            console.log('创建目录:', dirPath);
+                            fs.mkdirSync(dirPath, {{ recursive: true }});
+                        }}
+                    }} catch (dirErr) {{
+                        console.error('创建目录失败:', dirErr);
+                        // 继续尝试写入
+                    }}
+                    
+                    // 添加.txt扩展名如果没有扩展名
+                    let targetPath = filePath;
+                    if (!path.extname(filePath)) {{
+                        targetPath = `${{filePath}}.txt`;
+                        console.log('添加.txt扩展名:', targetPath);
+                    }}
+                    
+                    // 写入文件
+                    fs.writeFileSync(targetPath, args.content);
+                    
+                    // 验证文件是否被成功创建
+                    if (fs.existsSync(targetPath)) {{
+                        const stats = fs.statSync(targetPath);
+                        console.log('文件写入成功:', targetPath, '大小:', stats.size);
+                        
+                        return {{
+                            success: true,
+                            outputPath: targetPath,
+                            size: stats.size
+                        }};
+                    }} else {{
+                        throw new Error(`写入操作没有报错，但文件不存在: ${{targetPath}}`);
+                    }}
+                }} catch (err) {{
+                    console.error('写入文件失败:', err);
+                    
+                    // 尝试备用路径
+                    try {{
+                        const userHome = process.env.USERPROFILE || process.env.HOME;
+                        const backupPath = path.join(userHome, 'plugin_output.txt');
+                        console.log('尝试备用路径:', backupPath);
+                        
+                        fs.writeFileSync(backupPath, args.content);
+                        
+                        if (fs.existsSync(backupPath)) {{
+                            console.log('备用路径写入成功:', backupPath);
+                            return {{
+                                success: true,
+                                outputPath: backupPath,
+                                size: fs.statSync(backupPath).size,
+                                message: '原始路径失败，使用备用路径'
+                            }};
+                        }}
+                    }} catch (backupErr) {{
+                        console.error('备用路径也失败:', backupErr);
+                    }}
+                    
+                    throw new Error(`写入文件失败: ${{err.message}}`);
+                }}
+            }},
+        }};
+        "#
+    );
+    
+    // 创建执行代码，包含原生读写文件API和插件执行逻辑
     let code = format!(
         r#"
         try {{
-            // 定义 API 桥接函数
+            {}
+            
+            // 定义插件API桥接函数
             global.appApi = {{
                 callApi: function(apiName, apiArgs) {{
-                    return JSON.parse(process.env.APP_API_RESULT || '{{}}');
+                    console.log('调用API:', apiName, '参数:', JSON.stringify(apiArgs));
+                    
+                    // 先检查是否有原生实现
+                    if (apiName === 'readFile' || apiName === 'writeFile') {{
+                        try {{
+                            console.log('使用原生实现调用:', apiName);
+                            const result = nodeApiImpl[apiName](apiArgs);
+                            console.log('原生调用结果:', typeof result === 'string' ? `字符串(长度${{result.length}})` : result);
+                            return result;
+                        }} catch (err) {{
+                            console.error('原生调用失败:', err);
+                            return {{ success: false, error: err.message }};
+                        }}
+                    }}
+                    
+                    // 检查环境变量中的API结果
+                    try {{
+                        // 先检查是否有临时文件存储API结果
+                        const resultFilePath = process.env.APP_API_RESULT_FILE;
+                        if (resultFilePath) {{
+                            console.log('从临时文件读取API结果:', resultFilePath);
+                            try {{
+                                const fileContent = fs.readFileSync(resultFilePath, 'utf8');
+                                const parsedResult = JSON.parse(fileContent);
+                                console.log('从文件读取的API结果类型:', typeof parsedResult);
+                                return parsedResult;
+                            }} catch (fileErr) {{
+                                console.error('从文件读取API结果失败:', fileErr);
+                            }}
+                        }}
+                        
+                        // 回退到环境变量
+                        const apiResult = process.env.APP_API_RESULT;
+                        if (apiResult) {{
+                            try {{
+                                const parsedResult = JSON.parse(apiResult);
+                                return parsedResult;
+                            }} catch (jsonErr) {{
+                                console.error('API结果解析失败:', jsonErr);
+                                return {{ success: false, error: 'API结果解析失败' }};
+                            }}
+                        }}
+                    }} catch (err) {{
+                        console.error('获取API结果失败:', err);
+                    }}
+                    
+                    // 如果所有方法都失败，返回默认空对象
+                    console.log('未找到API结果或未实现的API:', apiName);
+                    return {{ success: false, error: '未找到API结果或API调用失败' }};
                 }}
             }};
             
@@ -184,11 +348,22 @@ pub fn execute_plugin_method(plugin_id: String, method: String, args: Value) -> 
             
             // 执行插件方法
             const result = plugin.{}({});
-            console.log(JSON.stringify({{ success: true, result }}));
+            
+            // 检查结果类型
+            if (result && typeof result === 'object' && 'success' in result) {{
+                // 如果结果已经包含 success 字段，直接使用
+                console.log('插件返回了标准格式结果:', JSON.stringify(result));
+                console.log(JSON.stringify(result));
+            }} else {{
+                // 否则包装成标准格式
+                console.log('将插件结果包装为标准格式:', JSON.stringify(result));
+                console.log(JSON.stringify({{ success: true, result }}));
+            }}
         }} catch (error) {{
             console.log(JSON.stringify({{ success: false, error: error.toString() }}));
         }}
         "#,
+        node_api_functions,
         main_file.to_string_lossy().replace('\\', "\\\\"),
         method,
         method,

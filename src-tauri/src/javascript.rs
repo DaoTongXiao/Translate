@@ -76,19 +76,51 @@ pub fn execute_plugin_js(code: String, api_name: Option<String>, api_args: Optio
     let mut env_vars = HashMap::new();
     
     // 如果有 API 调用，处理 API 结果
-    if let (Some(name), Some(args)) = (api_name, api_args) {
+    if let (Some(name), Some(args)) = (api_name, api_args.clone()) {
+        println!("API调用: {} 参数: {:?}", name, args);
+        
+        // 为文件操作API提供额外的日志
+        if name == "writeFile" {
+            if let Some(obj) = args.as_object() {
+                if let Some(path) = obj.get("path").and_then(|p| p.as_str()) {
+                    println!("尝试写入文件路径: {}", path);
+                }
+                if let Some(content) = obj.get("content").and_then(|c| c.as_str()) {
+                    println!("写入内容长度: {}", content.len());
+                }
+            }
+        }
+        
         // 调用 API 并获取结果
         match plugin_api::call_api(&name, args) {
             Ok(result) => {
+                // 为API结果提供更多日志
+                println!("API调用成功: {} 结果类型: {:?}", name, result);
+                
                 // 将 API 结果序列化为 JSON 字符串并设置为环境变量
+                // 对于大型结果，考虑写入临时文件而不是环境变量
                 if let Ok(result_json) = serde_json::to_string(&result) {
+                    if result_json.len() > 1024 {
+                        // 对于大型结果，写入临时文件
+                        let result_file = temp_dir.join("api_result.json");
+                        if let Err(e) = fs::write(&result_file, &result_json) {
+                            println!("写入API结果到临时文件失败: {}", e);
+                        } else {
+                            println!("API结果已写入临时文件: {:?}", result_file);
+                            env_vars.insert("APP_API_RESULT_FILE".to_string(), result_file.to_string_lossy().to_string());
+                        }
+                    }
+                    
+                    // 无论如何都设置环境变量，作为备份方式
                     env_vars.insert("APP_API_RESULT".to_string(), result_json);
                 } else {
+                    println!("API结果序列化失败");
                     env_vars.insert("APP_API_RESULT".to_string(), "{\"error\":\"API 结果序列化失败\"}".to_string());
                 }
             },
             Err(e) => {
                 // API 调用失败，返回错误信息
+                println!("API调用失败: {} - {}", name, e);
                 env_vars.insert("APP_API_RESULT".to_string(), 
                     format!("{{\"error\":\"API 调用失败: {}\"}}", e));
             }
@@ -119,23 +151,27 @@ pub fn execute_plugin_js(code: String, api_name: Option<String>, api_args: Optio
         return Err(format!("Node.js 执行错误: {}", stderr));
     }
     
+    println!("Node.js 输出: {}", stdout);
+    println!("stderr: {}", stderr);
+    
     // 尝试解析 JSON 输出
     let result: serde_json::Result<serde_json::Value> = serde_json::from_str(&stdout);
     match result {
         Ok(value) => {
+            println!("JSON 解析成功: {}", value);
+            
+            // 如果是已格式化的结果，用于插件方法调用
             if let Some(obj) = value.as_object() {
                 if let Some(success) = obj.get("success") {
-                    if success.as_bool() == Some(true) {
-                        if let Some(result) = obj.get("result") {
-                            return Ok(result.clone());
-                        }
-                    } else if let Some(error) = obj.get("error") {
-                        if let Some(err_str) = error.as_str() {
-                            return Err(err_str.to_string());
-                        }
-                    }
+                    println!("JSON包含 success 字段: {}", success);
+                    
+                    // 返回已格式化的完整结果，而非仅result字段
+                    // 这是为了确保插件返回的其他元数据字段也被保留
+                    return Ok(value);
                 }
             }
+            
+            // 如果不是标准格式，则直接返回原始值
             Ok(value)
         },
         Err(_) => {
