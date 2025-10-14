@@ -3,7 +3,6 @@ pub mod image_converter;
 
 use excel::process_excel;
 use image_converter::convert_to_ico;
-use std::path::PathBuf;
 use tauri::{AppHandle, Manager, Emitter};
 use tauri::menu::{MenuBuilder, MenuEvent, SubmenuBuilder, MenuItemBuilder};
 
