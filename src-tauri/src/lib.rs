@@ -1,14 +1,8 @@
 mod excel;
 pub mod image_converter;
-pub mod javascript;
-pub mod plugin_api;
-pub mod plugins;
 
 use excel::process_excel;
 use image_converter::convert_to_ico;
-use javascript::{execute_js, initialize_js};
-use plugin_api::plugin_call_api;
-use plugins::{initialize_plugins, get_plugins, execute_plugin_method, install_plugin, uninstall_plugin, plugin_api_call};
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager, Emitter};
 use tauri::menu::{MenuBuilder, MenuEvent, SubmenuBuilder, MenuItemBuilder};
@@ -131,17 +125,11 @@ fn create_menu(app: &tauri::App) -> tauri::Result<()> {
         .accelerator("CommandOrControl+E")
         .build(app)?;
 
-    // 创建 JavaScript 执行菜单项
-    let js_executor_item = MenuItemBuilder::new("执行JavaScript")
-        .id("js_executor")
-        .accelerator("CommandOrControl+J")
-        .build(app)?;
 
     // 创建工具子菜单
     let tools_menu = SubmenuBuilder::new(app, "工具")
         .item(&image_converter_item)
         .item(&excel_processor_item)
-        .item(&js_executor_item)
         .build()?;
 
     // 创建关于菜单项
@@ -188,11 +176,6 @@ fn handle_menu_event(app: &AppHandle, event: MenuEvent) {
                 window.emit("switch-tool", "excel").unwrap();
             }
         }
-        "js_executor" => {
-            if let Some(window) = app.get_webview_window("main") {
-                window.emit("switch-tool", "javascript").unwrap();
-            }
-        }
         "about" => println!("关于"),
         _ => {}
     }
@@ -200,9 +183,6 @@ fn handle_menu_event(app: &AppHandle, event: MenuEvent) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    // 初始化 JavaScript 环境
-    initialize_js();
-    
     // 初始化应用
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
@@ -210,30 +190,13 @@ pub fn run() {
         .setup(|app| {
             // 创建菜单
             create_menu(app)?;
-            
-            // 初始化插件系统
-            let app_dir = app.path().app_data_dir().unwrap_or_else(|_| PathBuf::from("."));
-            if let Err(e) = initialize_plugins(&app_dir) {
-                eprintln!("初始化插件系统失败: {}", e);
-            }
-            
-            // 初始化插件 API
-            plugin_api::initialize_plugin_api(app.handle().clone());
-            
             Ok(())
         })
         .on_menu_event(handle_menu_event)
         .invoke_handler(tauri::generate_handler![
             process_excel, 
             convert_to_ico, 
-            open_file, 
-            execute_js,
-            get_plugins,
-            execute_plugin_method,
-            install_plugin,
-            uninstall_plugin,
-            plugin_api_call,
-            plugin_call_api
+            open_file
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
