@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "tools",
+  "productName": "translate",
   "version": "0.1.0",
   "identifier": "com.tools.app",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "tools",
+        "title": "磨刀",
         "width": 800,
         "height": 600
       }
