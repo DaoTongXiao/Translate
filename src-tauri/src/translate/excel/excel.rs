@@ -3,7 +3,6 @@ use rust_xlsxwriter::{Workbook};
 use scraper::Html;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
-use tauri::command;
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -49,7 +48,7 @@ fn convert_to_date_string(cell: &str) -> String {
     cell.to_string() // 如果不是数字或计算失败，返回原始字符串
 }
 
-#[command]
+#[tauri::command]
 pub async fn process_excel(input_path: String) -> ProcessResult {
     let path = Path::new(&input_path);
 
