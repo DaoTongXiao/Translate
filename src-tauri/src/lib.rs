@@ -37,7 +37,6 @@ fn open_file(path: String) {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let _ = app;
     // 初始化应用
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
