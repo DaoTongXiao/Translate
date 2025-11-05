@@ -6,7 +6,6 @@ use translate::image::convert_to_ico;
 // 打开文件函数
 #[tauri::command]
 fn open_file(path: String) {
-    
     #[cfg(target_os = "windows")]
     {
         use std::process::Command;
@@ -41,12 +40,10 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
-        .setup(|app| {
-            Ok(())
-        })
+        .setup(|_app| Ok(()))
         .invoke_handler(tauri::generate_handler![
-            process_excel, 
-            convert_to_ico, 
+            process_excel,
+            convert_to_ico,
             open_file
         ])
         .run(tauri::generate_context!())
