@@ -1,0 +1,184 @@
+@use "../styles/tokens" as *;
+
+.chatCanvas {
+  flex: 1;
+  padding: 32px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modelTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.modelSubtitle {
+  margin: 2px 0 0;
+  color: $gray-500;
+  font-size: 0.9rem;
+}
+
+.headerActions {
+  display: flex;
+  gap: 6px;
+}
+
+.ghostButton {
+  @include ghost-icon-button;
+}
+
+.chatScroller {
+  flex: 1;
+  border-radius: 28px;
+  border: 1px dashed rgba($gray-500, 0.2);
+  display: flex;
+  flex-direction: column;
+  padding: 32px;
+  gap: 16px;
+  min-height: 0;
+  overflow-y: auto;
+  background: repeating-linear-gradient(
+      135deg,
+      rgba($primary, 0.03),
+      rgba($primary, 0.03) 12px,
+      transparent 12px,
+      transparent 24px
+    ),
+    #fafbff;
+  @include subtle-scrollbar(6px);
+}
+
+.emptyState {
+  margin: auto;
+  text-align: center;
+  color: $gray-500;
+}
+
+.emptyIcon {
+  width: 72px;
+  height: 72px;
+  border-radius: 24px;
+  background: white;
+  box-shadow: $shadow-soft;
+  display: grid;
+  place-items: center;
+  margin: 0 auto 18px;
+  color: $gray-300;
+}
+
+.emptyTitle {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.emptySubtitle {
+  font-size: 0.9rem;
+}
+
+.messageBubble {
+  max-width: 60%;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  display: inline-flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.messageBubbleUser {
+  align-self: flex-end;
+  background: $primary;
+  color: white;
+}
+
+.messageBubbleAssistant {
+  align-self: flex-start;
+}
+
+.messageBody {
+  margin: 0;
+}
+
+.timestamp {
+  font-size: 0.75rem;
+  color: inherit;
+  opacity: 0.65;
+}
+
+.messageComposer {
+  border-radius: 28px;
+  border: 1px solid rgba($gray-500, 0.2);
+  padding: 20px 24px;
+  background: white;
+  box-shadow: $shadow-soft;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.composerTextarea {
+  border: none;
+  resize: none;
+  min-height: 90px;
+  outline: none;
+  font-size: 1rem;
+  color: $gray-700;
+}
+
+.composerToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.composerActions {
+  display: flex;
+  gap: 8px;
+}
+
+.sendButton {
+  border: none;
+  background: $gray-700;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.sendButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.shortcutHint {
+  padding: 2px 6px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 0.75rem;
+}
+
+@media (max-width: 1280px) {
+  .chatCanvas {
+    padding: 24px;
+  }
+
+  .chatScroller {
+    padding: 24px;
+  }
+}

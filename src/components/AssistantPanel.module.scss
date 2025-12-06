@@ -1,0 +1,179 @@
+@use "../styles/tokens" as *;
+
+.assistantPanel {
+  background: $surface;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  overflow: hidden;
+  box-shadow: inset 1px 0 0 rgba(15, 23, 42, 0.04);
+}
+
+@media (max-width: 1024px) {
+  .assistantPanel {
+    display: none;
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: $gray-500;
+  font-size: 0.85rem;
+}
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba($primary, 0.12);
+  color: $primary;
+  font-weight: 600;
+}
+
+.ghostButton {
+  @include ghost-icon-button;
+}
+
+.scrollArea {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-right: 6px;
+  margin-right: -6px;
+  scroll-behavior: smooth;
+  @include subtle-scrollbar(4px);
+}
+
+.panelSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.panelLabel {
+  font-size: 0.85rem;
+  color: $gray-500;
+}
+
+.inputControl {
+  border: 1px solid rgba($gray-500, 0.2);
+  border-radius: 14px;
+  padding: 10px 14px;
+  background: rgba(249, 250, 255, 0.8);
+  color: $gray-700;
+  outline: none;
+  font: inherit;
+}
+
+.textareaControl {
+  resize: vertical;
+}
+
+.panelSectionHeading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.panelValue {
+  font-weight: 600;
+}
+
+.rangeMarkers {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: $gray-500;
+}
+
+.rangeInput {
+  width: 100%;
+  accent-color: $primary;
+}
+
+.panelGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.emojiSelector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px dashed rgba($gray-500, 0.3);
+}
+
+.emojiSelector span[role="img"] {
+  font-size: 1.5rem;
+}
+
+.toggles {
+  gap: 16px;
+}
+
+.panelToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(249, 250, 255, 0.9);
+  border: 1px solid rgba($gray-500, 0.1);
+}
+
+.panelToggle span {
+  color: $gray-500;
+  font-size: 0.85rem;
+}
+
+.toggleButton {
+  width: 46px;
+  height: 24px;
+  border-radius: 999px;
+  border: none;
+  background: rgba($gray-500, 0.4);
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.toggleThumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.toggleChecked {
+  background: rgba($primary, 0.65);
+  justify-content: flex-end;
+}
+
+.toggleChecked .toggleThumb {
+  transform: translateX(2px);
+}
