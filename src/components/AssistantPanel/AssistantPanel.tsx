@@ -1,4 +1,4 @@
-import { AssistantSettings } from "../types/chat";
+import { AssistantSettings } from "@/types/chat";
 import styles from "./AssistantPanel.module.scss";
 
 interface AssistantPanelProps {

@@ -1,4 +1,4 @@
-import { Conversation } from "../types/chat";
+import { Conversation } from "@/types/chat";
 import styles from "./AppHeader.module.scss";
 
 interface AppHeaderProps {

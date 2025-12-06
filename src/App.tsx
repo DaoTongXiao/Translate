@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
-import styles from "./App.module.scss";
-import Sidebar from "./components/Sidebar";
-import ChatCanvas from "./components/ChatCanvas";
-import AssistantPanel from "./components/AssistantPanel";
-import AppHeader from "./components/AppHeader";
-import { AssistantSettings, Conversation, Message } from "./types/chat";
+import styles from "@/App.module.scss";
+import Sidebar from "@/components/Sidebar/Sidebar";
+import ChatCanvas from "@/components/ChatCanvas/ChatCanvas";
+import AssistantPanel from "@/components/AssistantPanel/AssistantPanel";
+import AppHeader from "@/components/Header/AppHeader";
+import { AssistantSettings, Conversation, Message } from "@/types/chat";
 
 const baseConversations: Conversation[] = [
   {

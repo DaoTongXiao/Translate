@@ -1,4 +1,4 @@
-import { Conversation, Message } from "../types/chat";
+import { Conversation, Message } from "@/types/chat";
 import styles from "./ChatCanvas.module.scss";
 
 interface ChatCanvasProps {
