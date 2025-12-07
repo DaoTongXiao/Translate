@@ -8,20 +8,30 @@
   gap: 20px;
   min-height: 0;
   overflow: hidden;
-  background: #f8fafc; // Subtle gray background for contrast
+  background: white;
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba($gray-500, 0.08);
+  padding-bottom: 20px;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.modelInfo {
+  display: flex;
+  flex-direction: column;
 }
 
 .modelTitle {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: $gray-700;
 }
@@ -30,6 +40,26 @@
   margin: 2px 0 0;
   color: $gray-500;
   font-size: 0.85rem;
+}
+
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: $status-online;
+  background: $status-online-bg;
+}
+
+.statusIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: $status-online;
+  box-shadow: 0 0 0 3px rgba(60, 203, 156, 0.18);
 }
 
 .headerActions {
@@ -43,15 +73,18 @@
 
 .chatScroller {
   flex: 1;
-  border-radius: 16px;
+  // Remove card styling to make it seamless
+  border-radius: 0;
   display: flex;
   flex-direction: column;
-  padding: 24px;
-  gap: 16px;
+  padding: 0 20px; // Reduce side padding if needed, or keep it spacious
+  gap: 24px;
   min-height: 0;
   overflow-y: auto;
   background: white;
-  border: 1px solid rgba($gray-500, 0.08);
+  border: none;
+  // border: 1px solid rgba($gray-500, 0.08);
+
   @include subtle-scrollbar(6px);
 }
 
@@ -117,13 +150,15 @@
 }
 
 .messageComposer {
-  border-radius: 16px;
-  border: 1px solid rgba($gray-500, 0.12);
+  margin-top: 10px;
+  border-radius: 20px;
+  border: 1px solid rgba($gray-500, 0.1);
   padding: 16px 20px;
   background: white;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04); // Floating effect
 }
 
 .composerTextarea {

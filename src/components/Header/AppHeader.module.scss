@@ -6,8 +6,8 @@
   width: 100%;
   height: $header-height;
   padding: 0 24px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: 24px;
   border-bottom: 1px solid rgba($gray-500, 0.12);
@@ -25,6 +25,37 @@
 
 .left {
   justify-content: flex-start;
+}
+
+.modelInfo {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+}
+
+.modelTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: $gray-700;
+  white-space: nowrap;
+  
+  // 添加分隔符
+  &::after {
+    content: "·";
+    margin-left: 8px;
+    color: $gray-400;
+    font-weight: 400;
+  }
+}
+
+.modelSubtitle {
+  margin: 0;
+  color: $gray-500;
+  font-size: 0.85rem;
+  white-space: nowrap;
 }
 
 .center {
@@ -122,13 +153,14 @@
 
 @media (max-width: 1024px) {
   .appHeader {
-    grid-template-columns: 1fr auto;
-    row-gap: 12px;
     height: auto;
     padding: 12px 20px;
+    flex-wrap: wrap;
+    row-gap: 12px;
   }
 
   .center {
-    grid-column: 1 / -1;
+    width: 100%;
+    order: 3;
   }
 }

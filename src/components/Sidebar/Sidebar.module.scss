@@ -1,8 +1,8 @@
 @use "@/styles/tokens" as *;
 
 .sidebar {
-  background: white; // Changed to white for visual consistency
-  border-right: 1px solid rgba(120, 131, 166, 0.1);
+  background: white;
+  border-right: 1px solid rgba(0, 0, 0, 0.04);
   padding: 20px 16px;
   display: flex;
   flex-direction: column;
@@ -96,14 +96,17 @@
   color: inherit;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(0, 0, 0, 0.04);
   }
 }
 
 .conversationItemActive {
-  background: white;
-  box-shadow: $shadow-soft;
-  transform: translateY(-1px);
+  background: $gray-50;
+  color: $primary; // Optional: highlight text color to make it clear
+  font-weight: 500; 
+  box-shadow: none; // Flat look for white sidebar often works better, or use very subtle
+  // box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03); 
+  transform: translateY(0); 
 }
 
 .conversationHeader {

@@ -199,43 +199,47 @@ function App() {
   return (
     <ConfigProvider>
       <div className={styles.appLayout}>
-        <AppHeader
-          activeConversation={selectedConversation}
-          onRefresh={handleRefreshConversation}
-          onOpenHistory={handleOpenHistoryDrawer}
-          onOpenPreferences={handleOpenPreferences}
-          isLeftSidebarOpen={isLeftSidebarOpen}
-          toggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
-          isRightSidebarOpen={isRightSidebarOpen}
-          toggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
-        />
+        {/* 左侧边栏 - 独立占满全高 */}
+        <div className={`${styles.sidebarContainer} ${!isLeftSidebarOpen ? styles.collapsed : ""}`}>
+          <Sidebar
+            conversations={filteredConversations}
+            selectedConversationId={selectedConversationId}
+            searchTerm={searchTerm}
+            onSearchTermChange={setSearchTerm}
+            onSelectConversation={setSelectedConversationId}
+            onCreateConversation={handleCreateConversation}
+          />
+        </div>
 
-        <div className={styles.appShell}>
-          <div className={`${styles.sidebarContainer} ${!isLeftSidebarOpen ? styles.collapsed : ""}`}>
-            <Sidebar
-              conversations={filteredConversations}
-              selectedConversationId={selectedConversationId}
-              searchTerm={searchTerm}
-              onSearchTermChange={setSearchTerm}
-              onSelectConversation={setSelectedConversationId}
-              onCreateConversation={handleCreateConversation}
-            />
-          </div>
+        {/* 右侧区域 - 包含 header 和主内容 */}
+        <div className={styles.rightSection}>
+          <AppHeader
+            onRefresh={handleRefreshConversation}
+            onOpenHistory={handleOpenHistoryDrawer}
+            onOpenPreferences={handleOpenPreferences}
+            isLeftSidebarOpen={isLeftSidebarOpen}
+            toggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
+            isRightSidebarOpen={isRightSidebarOpen}
+            toggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+            conversation={selectedConversation}
+          />
 
-          <div className={styles.mainContent}>
-            <main className={styles.chatMain}>
-              <ChatCanvas
-                conversation={selectedConversation}
-                messages={activeMessages}
-                draftMessage={composerDraft}
-                onDraftChange={setComposerDraft}
-                onSendMessage={handleSendMessage}
-              />
-            </main>
-          </div>
+          <div className={styles.appShell}>
+            <div className={styles.mainContent}>
+              <main className={styles.chatMain}>
+                <ChatCanvas
+                  conversation={selectedConversation}
+                  messages={activeMessages}
+                  draftMessage={composerDraft}
+                  onDraftChange={setComposerDraft}
+                  onSendMessage={handleSendMessage}
+                />
+              </main>
+            </div>
 
-          <div className={`${styles.assistantPanelContainer} ${!isRightSidebarOpen ? styles.collapsed : ""}`}>
-             <AssistantPanel settings={settings} onChange={handleSettingsUpdate} />
+            <div className={`${styles.assistantPanelContainer} ${!isRightSidebarOpen ? styles.collapsed : ""}`}>
+               <AssistantPanel settings={settings} onChange={handleSettingsUpdate} />
+            </div>
           </div>
         </div>
       </div>

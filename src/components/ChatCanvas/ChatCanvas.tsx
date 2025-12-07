@@ -105,30 +105,6 @@ const ChatCanvas = ({ conversation, messages, draftMessage, onDraftChange, onSen
 
   return (
     <section className={styles.chatCanvas}>
-      <header className={styles.header}>
-        <div>
-          <p className={styles.modelTitle}>OpenAI · GPT-4.1</p>
-          <p className={styles.modelSubtitle}>{conversation ? conversation.summary : "OpenRouter"}</p>
-        </div>
-        <div className={styles.headerActions}>
-          <button type="button" className={styles.ghostButton} aria-label="刷新">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 12C3 7.58172 6.58172 4 11 4C12.8363 4 14.5416 4.6512 15.864 5.75736" strokeLinecap="round" />
-              <path d="M21 12C21 16.4183 17.4183 20 13 20C11.1637 20 9.45845 19.3488 8.13604 18.2426" strokeLinecap="round" />
-              <path d="M7 6L11 2L7 6Z" />
-              <path d="M17 18L13 22L17 18Z" />
-            </svg>
-          </button>
-          <button type="button" className={styles.ghostButton} aria-label="更多">
-            <svg width="4" height="16" viewBox="0 0 4 16" fill="currentColor">
-              <circle cx="2" cy="2" r="2" />
-              <circle cx="2" cy="8" r="2" />
-              <circle cx="2" cy="14" r="2" />
-            </svg>
-          </button>
-        </div>
-      </header>
-
       <div className={styles.chatScroller}>
         {messages.length === 0 ? (
           <EmptyState />

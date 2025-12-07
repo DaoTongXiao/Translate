@@ -2,28 +2,22 @@
 
 .appLayout {
   height: 100vh;
-  min-width: 900px; // Prevent window from shrinking too small
+  min-width: 900px;
   display: flex;
-  flex-direction: column;
+  flex-direction: row; // 改为水平布局
   background-color: #f8fafc;
   overflow: hidden;
 }
 
-.appShell {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-}
-
+// 左侧边栏 - 独立占满全高
 .sidebarContainer {
   width: $sidebar-width;
+  height: 100vh;
   flex-shrink: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   border-right: 1px solid rgba(15, 23, 42, 0.06);
-  background: white; // Changed to white for visual consistency
+  background: white;
   display: flex;
   flex-direction: column;
 
@@ -34,6 +28,23 @@
   }
 }
 
+// 右侧主区域 - 包含 header 和内容
+.rightSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+// 内容容器 - header 下方的区域
+.appShell {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+}
 
 .mainContent {
   flex: 1;
@@ -50,7 +61,7 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow: hidden; // Important for inner scrolling
+  overflow: hidden;
 }
 
 .assistantPanelContainer {
@@ -68,9 +79,38 @@
   }
 }
 
+// 响应式布局：窗口变小时按顺序隐藏侧边栏
+// 1. < 1280px: 隐藏右侧助手面板
+// 2. < 900px: 同时隐藏左侧边栏，只显示对话区域
+
 @media (max-width: 1280px) {
+  .appLayout {
+    min-width: 600px;
+  }
+
   .sidebarContainer {
     width: 260px;
   }
+
+  // 窗口较小时隐藏右侧助手面板
+  .assistantPanelContainer {
+    width: 0;
+    opacity: 0;
+    border-left: none;
+    pointer-events: none;
+  }
 }
 
+@media (max-width: 900px) {
+  .appLayout {
+    min-width: 320px;
+  }
+
+  // 窗口更小时同时隐藏左侧边栏
+  .sidebarContainer {
+    width: 0;
+    opacity: 0;
+    border-right: none;
+    pointer-events: none;
+  }
+}
