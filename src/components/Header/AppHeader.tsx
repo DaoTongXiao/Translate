@@ -1,4 +1,13 @@
 import { Conversation } from "@/types/chat";
+import { Button, Tooltip } from "antd";
+import { 
+  MenuFoldOutlined, 
+  MenuUnfoldOutlined,
+  ReloadOutlined,
+  HistoryOutlined,
+  SettingOutlined,
+  LayoutOutlined
+} from "@ant-design/icons";
 import styles from "./AppHeader.module.scss";
 
 interface AppHeaderProps {
@@ -6,15 +15,37 @@ interface AppHeaderProps {
   onRefresh: () => void;
   onOpenHistory: () => void;
   onOpenPreferences: () => void;
+  isLeftSidebarOpen: boolean;
+  toggleLeftSidebar: () => void;
+  isRightSidebarOpen: boolean;
+  toggleRightSidebar: () => void;
 }
 
-const AppHeader = ({ activeConversation, onRefresh, onOpenHistory, onOpenPreferences }: AppHeaderProps) => {
+const AppHeader = ({ 
+  activeConversation, 
+  onRefresh, 
+  onOpenHistory, 
+  onOpenPreferences,
+  isLeftSidebarOpen,
+  toggleLeftSidebar,
+  isRightSidebarOpen,
+  toggleRightSidebar
+}: AppHeaderProps) => {
   const conversationTitle = activeConversation?.title ?? "等待会话";
   const conversationSummary = activeConversation?.summary ?? "选择或新建会话以开始协作";
 
   return (
     <header className={styles.appHeader}>
       <div className={`${styles.section} ${styles.left}`}>
+        <Tooltip title={isLeftSidebarOpen ? "收起侧边栏" : "展开侧边栏"}>
+          <Button 
+            type="text" 
+            icon={isLeftSidebarOpen ? <MenuFoldOutlined /> : <MenuUnfoldOutlined />} 
+            onClick={toggleLeftSidebar}
+            className={styles.toggleButton}
+          />
+        </Tooltip>
+        
         <span className={styles.brandIcon} aria-hidden>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="12" cy="12" r="8" />
@@ -39,27 +70,27 @@ const AppHeader = ({ activeConversation, onRefresh, onOpenHistory, onOpenPrefere
       </div>
 
       <div className={`${styles.section} ${styles.right}`}>
-        <button type="button" className={styles.iconButton} aria-label="刷新当前会话" onClick={onRefresh}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M3 12C3 7.58172 6.58172 4 11 4C12.8363 4 14.5416 4.6512 15.864 5.75736" strokeLinecap="round" />
-            <path d="M21 12C21 16.4183 17.4183 20 13 20C11.1637 20 9.45845 19.3488 8.13604 18.2426" strokeLinecap="round" />
-            <path d="M7 6L11 2L7 6Z" />
-            <path d="M17 18L13 22L17 18Z" />
-          </svg>
-        </button>
-        <button type="button" className={styles.iconButton} aria-label="查看历史记录" onClick={onOpenHistory}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M3 5H21" strokeLinecap="round" />
-            <path d="M3 12H21" strokeLinecap="round" />
-            <path d="M3 19H15" strokeLinecap="round" />
-          </svg>
-        </button>
-        <button type="button" className={styles.iconButton} aria-label="打开偏好设置" onClick={onOpenPreferences}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="3" />
-            <path d="M19.4 15A1.65 1.65 0 0 0 21 13.35V10.65A1.65 1.65 0 0 0 19.4 9L17.55 8.35A1.65 1.65 0 0 1 16.5 6.9L16.1 5.05A1.65 1.65 0 0 0 14.45 3.9H9.55A1.65 1.65 0 0 0 7.9 5.05L7.5 6.9A1.65 1.65 0 0 1 6.45 8.35L4.6 9A1.65 1.65 0 0 0 3 10.65V13.35A1.65 1.65 0 0 0 4.6 15L6.45 15.65A1.65 1.65 0 0 1 7.5 17.1L7.9 18.95A1.65 1.65 0 0 0 9.55 20.1H14.45A1.65 1.65 0 0 0 16.1 18.95L16.5 17.1A1.65 1.65 0 0 1 17.55 15.65Z" />
-          </svg>
-        </button>
+        <Tooltip title="刷新当前会话">
+          <Button type="text" icon={<ReloadOutlined />} onClick={onRefresh} />
+        </Tooltip>
+        
+        <Tooltip title="查看历史记录">
+          <Button type="text" icon={<HistoryOutlined />} onClick={onOpenHistory} />
+        </Tooltip>
+        
+        <Tooltip title="打开偏好设置">
+          <Button type="text" icon={<SettingOutlined />} onClick={onOpenPreferences} />
+        </Tooltip>
+
+        <div className={styles.divider} />
+
+        <Tooltip title={isRightSidebarOpen ? "收起助手面板" : "展开助手面板"}>
+          <Button 
+             type="text"
+             icon={<LayoutOutlined style={{ transform: isRightSidebarOpen ? 'none' : 'rotate(180deg)' }} />}
+             onClick={toggleRightSidebar}
+          />
+        </Tooltip>
       </div>
     </header>
   );

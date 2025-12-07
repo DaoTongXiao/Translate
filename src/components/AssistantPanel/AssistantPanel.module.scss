@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  height: 100%; // Ensure it fills container
   min-height: 0;
   overflow: hidden;
   box-shadow: inset 1px 0 0 rgba(15, 23, 42, 0.04);
@@ -72,18 +73,10 @@
   color: $gray-500;
 }
 
-.inputControl {
-  border: 1px solid rgba($gray-500, 0.2);
-  border-radius: 14px;
-  padding: 10px 14px;
-  background: rgba(249, 250, 255, 0.8);
-  color: $gray-700;
-  outline: none;
-  font: inherit;
-}
 
-.textareaControl {
-  resize: vertical;
+
+.selectControl {
+  width: 100%;
 }
 
 .panelSectionHeading {
@@ -101,11 +94,6 @@
   justify-content: space-between;
   font-size: 0.75rem;
   color: $gray-500;
-}
-
-.rangeInput {
-  width: 100%;
-  accent-color: $primary;
 }
 
 .panelGrid {
@@ -144,36 +132,4 @@
 .panelToggle span {
   color: $gray-500;
   font-size: 0.85rem;
-}
-
-.toggleButton {
-  width: 46px;
-  height: 24px;
-  border-radius: 999px;
-  border: none;
-  background: rgba($gray-500, 0.4);
-  padding: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.toggleThumb {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: white;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.2);
-  transition: transform 0.2s ease;
-}
-
-.toggleChecked {
-  background: rgba($primary, 0.65);
-  justify-content: flex-end;
-}
-
-.toggleChecked .toggleThumb {
-  transform: translateX(2px);
 }

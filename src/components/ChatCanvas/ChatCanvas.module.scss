@@ -2,30 +2,34 @@
 
 .chatCanvas {
   flex: 1;
-  padding: 32px 48px;
+  padding: 24px 32px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
   min-height: 0;
   overflow: hidden;
+  background: #f8fafc; // Subtle gray background for contrast
 }
 
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba($gray-500, 0.08);
 }
 
 .modelTitle {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
+  color: $gray-700;
 }
 
 .modelSubtitle {
   margin: 2px 0 0;
   color: $gray-500;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .headerActions {
@@ -39,22 +43,15 @@
 
 .chatScroller {
   flex: 1;
-  border-radius: 28px;
-  border: 1px dashed rgba($gray-500, 0.2);
+  border-radius: 16px;
   display: flex;
   flex-direction: column;
-  padding: 32px;
+  padding: 24px;
   gap: 16px;
   min-height: 0;
   overflow-y: auto;
-  background: repeating-linear-gradient(
-      135deg,
-      rgba($primary, 0.03),
-      rgba($primary, 0.03) 12px,
-      transparent 12px,
-      transparent 24px
-    ),
-    #fafbff;
+  background: white;
+  border: 1px solid rgba($gray-500, 0.08);
   @include subtle-scrollbar(6px);
 }
 
@@ -65,75 +62,82 @@
 }
 
 .emptyIcon {
-  width: 72px;
-  height: 72px;
-  border-radius: 24px;
-  background: white;
-  box-shadow: $shadow-soft;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background: #f1f5f9;
   display: grid;
   place-items: center;
-  margin: 0 auto 18px;
+  margin: 0 auto 16px;
   color: $gray-300;
 }
 
 .emptyTitle {
   font-weight: 600;
   margin-bottom: 4px;
+  color: $gray-700;
 }
 
 .emptySubtitle {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  color: $gray-300;
 }
 
 .messageBubble {
-  max-width: 60%;
-  padding: 14px 18px;
-  border-radius: 18px;
-  background: white;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  max-width: 70%;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: #f1f5f9;
   display: inline-flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .messageBubbleUser {
   align-self: flex-end;
   background: $primary;
   color: white;
+  border-radius: 16px 16px 4px 16px;
 }
 
 .messageBubbleAssistant {
   align-self: flex-start;
+  border-radius: 16px 16px 16px 4px;
 }
 
 .messageBody {
   margin: 0;
+  line-height: 1.5;
 }
 
 .timestamp {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: inherit;
-  opacity: 0.65;
+  opacity: 0.6;
 }
 
 .messageComposer {
-  border-radius: 28px;
-  border: 1px solid rgba($gray-500, 0.2);
-  padding: 20px 24px;
+  border-radius: 16px;
+  border: 1px solid rgba($gray-500, 0.12);
+  padding: 16px 20px;
   background: white;
-  box-shadow: $shadow-soft;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .composerTextarea {
   border: none;
   resize: none;
-  min-height: 90px;
+  min-height: 80px;
   outline: none;
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: $gray-700;
+  line-height: 1.5;
+
+  &::placeholder {
+    color: $gray-300;
+  }
 }
 
 .composerToolbar {
@@ -144,41 +148,48 @@
 
 .composerActions {
   display: flex;
-  gap: 8px;
+  gap: 4px;
 }
 
 .sendButton {
   border: none;
-  background: $gray-700;
+  background: $primary;
   color: white;
-  padding: 10px 18px;
-  border-radius: 14px;
+  padding: 8px 16px;
+  border-radius: 10px;
   font-weight: 600;
+  font-size: 0.9rem;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, transform 0.1s ease;
+
+  &:hover:not(:disabled) {
+    background: darken($primary, 5%);
+    transform: translateY(-1px);
+  }
 }
 
 .sendButton:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .shortcutHint {
   padding: 2px 6px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.15);
-  font-size: 0.75rem;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  font-size: 0.7rem;
 }
 
 @media (max-width: 1280px) {
   .chatCanvas {
-    padding: 24px;
+    padding: 20px;
   }
 
   .chatScroller {
-    padding: 24px;
+    padding: 20px;
   }
 }
+

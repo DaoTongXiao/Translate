@@ -1,15 +1,16 @@
 @use "@/styles/tokens" as *;
 
 .sidebar {
-  background: #f1f3f9;
-  border-right: 1px solid rgba(120, 131, 166, 0.15);
+  background: white; // Changed to white for visual consistency
+  border-right: 1px solid rgba(120, 131, 166, 0.1);
   padding: 20px 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  height: 100%;
   min-height: 0;
-  box-shadow: inset -1px 0 0 rgba(15, 23, 42, 0.04);
 }
+
 
 .topBar {
   display: flex;
@@ -46,51 +47,31 @@
   color: $gray-500;
 }
 
-.ghostButton {
-  @include ghost-icon-button;
-}
-
 .searchRow {
   display: flex;
   gap: 10px;
 }
 
-.searchBox {
-  flex: 1;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(118, 129, 154, 0.2);
-  border-radius: 14px;
-  padding: 0 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.searchInput {
+  // Override Ant Design styles if needed
+  :global(.ant-input-filled) {
+     background: rgba(255, 255, 255, 0.92);
+     &:hover, &:focus {
+        background: white;
+     }
+  }
 }
 
-.searchInput {
-  @include input-reset;
-  flex: 1;
-  padding: 10px 6px;
+.searchIcon {
+  color: $gray-400;
 }
 
 .newChatButton {
-  border: none;
-  border-radius: 16px;
-  background: $primary;
-  color: white;
+  // Override Ant Design button height/padding if needed
+  height: 44px;
   font-weight: 600;
-  padding: 12px 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  box-shadow: 0 10px 20px rgba($primary, 0.25);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 12px 26px rgba($primary, 0.28);
-  }
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba($primary, 0.2);
 }
 
 .conversationList {

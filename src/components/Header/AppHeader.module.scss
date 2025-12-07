@@ -2,21 +2,20 @@
 
 .appHeader {
   position: sticky;
-  top: 16px;
-  width: min(1400px, 100%);
-  margin: 0 auto;
+  top: 0;
+  width: 100%;
   height: $header-height;
-  border-radius: 24px;
-  padding: 0 32px;
+  padding: 0 24px;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 24px;
-  border: 1px solid rgba($gray-500, 0.12);
-  @include glass-panel(0.9, 22px);
-  box-shadow: inset 0 -1px 0 rgba($gray-500, 0.08);
+  border-bottom: 1px solid rgba($gray-500, 0.12);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
   z-index: 20;
 }
+
 
 .section {
   @include flex-center;
@@ -102,6 +101,23 @@
 
 .iconButton {
   @include icon-button;
+}
+
+// ... existing styles ...
+
+.toggleButton {
+  color: $gray-500;
+  &:hover {
+    color: $primary;
+    background: rgba($primary, 0.08);
+  }
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  background-color: rgba($gray-500, 0.2);
+  margin: 0 4px;
 }
 
 @media (max-width: 1024px) {

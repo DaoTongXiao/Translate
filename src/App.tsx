@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { ConfigProvider } from "antd";
 import styles from "@/App.module.scss";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import ChatCanvas from "@/components/ChatCanvas/ChatCanvas";
@@ -85,6 +86,10 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const [composerDraft, setComposerDraft] = useState("");
   const [settings, setSettings] = useState<AssistantSettings>(defaultSettings);
+  
+  // Sidebar visibility state
+  const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(true);
+  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
 
   const selectedConversation = useMemo(
     () => conversations.find((conversation) => conversation.id === selectedConversationId),
@@ -192,37 +197,49 @@ function App() {
     : [];
 
   return (
-    <div className={styles.appLayout}>
-      <AppHeader
-        activeConversation={selectedConversation}
-        onRefresh={handleRefreshConversation}
-        onOpenHistory={handleOpenHistoryDrawer}
-        onOpenPreferences={handleOpenPreferences}
-      />
-
-      <div className={styles.appShell}>
-        <Sidebar
-          conversations={filteredConversations}
-          selectedConversationId={selectedConversationId}
-          searchTerm={searchTerm}
-          onSearchTermChange={setSearchTerm}
-          onSelectConversation={setSelectedConversationId}
-          onCreateConversation={handleCreateConversation}
+    <ConfigProvider>
+      <div className={styles.appLayout}>
+        <AppHeader
+          activeConversation={selectedConversation}
+          onRefresh={handleRefreshConversation}
+          onOpenHistory={handleOpenHistoryDrawer}
+          onOpenPreferences={handleOpenPreferences}
+          isLeftSidebarOpen={isLeftSidebarOpen}
+          toggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
+          isRightSidebarOpen={isRightSidebarOpen}
+          toggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
         />
 
-        <main className={styles.chatMain}>
-          <ChatCanvas
-            conversation={selectedConversation}
-            messages={activeMessages}
-            draftMessage={composerDraft}
-            onDraftChange={setComposerDraft}
-            onSendMessage={handleSendMessage}
-          />
-        </main>
+        <div className={styles.appShell}>
+          <div className={`${styles.sidebarContainer} ${!isLeftSidebarOpen ? styles.collapsed : ""}`}>
+            <Sidebar
+              conversations={filteredConversations}
+              selectedConversationId={selectedConversationId}
+              searchTerm={searchTerm}
+              onSearchTermChange={setSearchTerm}
+              onSelectConversation={setSelectedConversationId}
+              onCreateConversation={handleCreateConversation}
+            />
+          </div>
 
-        <AssistantPanel settings={settings} onChange={handleSettingsUpdate} />
+          <div className={styles.mainContent}>
+            <main className={styles.chatMain}>
+              <ChatCanvas
+                conversation={selectedConversation}
+                messages={activeMessages}
+                draftMessage={composerDraft}
+                onDraftChange={setComposerDraft}
+                onSendMessage={handleSendMessage}
+              />
+            </main>
+          </div>
+
+          <div className={`${styles.assistantPanelContainer} ${!isRightSidebarOpen ? styles.collapsed : ""}`}>
+             <AssistantPanel settings={settings} onChange={handleSettingsUpdate} />
+          </div>
+        </div>
       </div>
-    </div>
+    </ConfigProvider>
   );
 }
 

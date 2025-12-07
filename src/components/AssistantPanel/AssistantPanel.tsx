@@ -1,4 +1,6 @@
 import { AssistantSettings } from "@/types/chat";
+import { Input, Select, Slider, Switch, Button } from "antd";
+import { SwapOutlined } from "@ant-design/icons";
 import styles from "./AssistantPanel.module.scss";
 
 interface AssistantPanelProps {
@@ -6,33 +8,17 @@ interface AssistantPanelProps {
   onChange: (update: Partial<AssistantSettings>) => void;
 }
 
-interface ToggleProps {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-}
-
-const Toggle = ({ checked, onChange }: ToggleProps) => (
-  <button
-    type="button"
-    className={`${styles.toggleButton} ${checked ? styles.toggleChecked : ""}`}
-    aria-pressed={checked}
-    onClick={() => onChange(!checked)}
-  >
-    <span className={styles.toggleThumb} />
-  </button>
-);
-
 const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
-  const handleInputChange = (field: keyof AssistantSettings) => (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    onChange({ [field]: event.target.value } as Partial<AssistantSettings>);
+  const handleInputChange = (field: keyof AssistantSettings) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    onChange({ [field]: e.target.value } as Partial<AssistantSettings>);
   };
 
-  const handleSelectChange = (field: keyof AssistantSettings) => (event: React.ChangeEvent<HTMLSelectElement>) => {
-    onChange({ [field]: event.target.value } as Partial<AssistantSettings>);
+  const handleSelectChange = (field: keyof AssistantSettings) => (value: string | number) => {
+     onChange({ [field]: value } as Partial<AssistantSettings>);
   };
 
-  const handleRangeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange({ temperature: Number(event.target.value) });
+  const handleSliderChange = (value: number) => {
+    onChange({ temperature: value });
   };
 
   return (
@@ -50,12 +36,11 @@ const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
           <label className={styles.panelLabel} htmlFor="assistant-id">
             ID
           </label>
-          <input
-            className={styles.inputControl}
+          <Input
             id="assistant-id"
-            type="text"
             value={settings.identifier}
             onChange={handleInputChange("identifier")}
+            className={styles.inputControl}
           />
         </div>
 
@@ -65,12 +50,7 @@ const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
             <span role="img" aria-label="当前头像">
               {settings.personaEmoji}
             </span>
-            <button type="button" className={styles.ghostButton} aria-label="更换图标">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 5V19" strokeLinecap="round" />
-                <path d="M5 12H19" strokeLinecap="round" />
-              </svg>
-            </button>
+            <Button type="text" icon={<SwapOutlined />} size="small" />
           </div>
         </div>
 
@@ -78,13 +58,13 @@ const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
           <label className={styles.panelLabel} htmlFor="system-prompt">
             系统提示词
           </label>
-          <textarea
-            className={`${styles.inputControl} ${styles.textareaControl}`}
+          <Input.TextArea
             id="system-prompt"
             rows={3}
             value={settings.systemPrompt}
             onChange={handleInputChange("systemPrompt")}
             placeholder="提示助手在本轮会话中的行为，例如“聚焦产品策略”。"
+            className={styles.inputControl}
           />
         </div>
 
@@ -96,14 +76,13 @@ const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
             </div>
             <span className={styles.panelValue}>{settings.temperature.toFixed(2)}</span>
           </div>
-          <input
-            className={styles.rangeInput}
-            type="range"
+          <Slider
             min={0}
             max={1}
             step={0.01}
             value={settings.temperature}
-            onChange={handleRangeChange}
+            onChange={handleSliderChange}
+            tooltip={{ formatter: (value) => value?.toFixed(2) }}
           />
           <div className={styles.rangeMarkers}>
             <span>严谨</span>
@@ -117,64 +96,68 @@ const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
             <label className={styles.panelLabel} htmlFor="max-output">
               最大输出长度
             </label>
-            <select
-              className={styles.inputControl}
+            <Select
               id="max-output"
               value={settings.maxOutputTokens}
               onChange={handleSelectChange("maxOutputTokens")}
-            >
-              <option value={1024}>默认</option>
-              <option value={2048}>2048 tokens</option>
-              <option value={4096}>4096 tokens</option>
-              <option value={8192}>8192 tokens</option>
-            </select>
+              className={styles.selectControl}
+              options={[
+                { value: 1024, label: "默认" },
+                { value: 2048, label: "2048 tokens" },
+                { value: 4096, label: "4096 tokens" },
+                { value: 8192, label: "8192 tokens" },
+              ]}
+            />
           </div>
           <div className={styles.panelSection}>
             <label className={styles.panelLabel} htmlFor="reply-language">
               回复语言
             </label>
-            <select
-              className={styles.inputControl}
+            <Select
               id="reply-language"
               value={settings.replyLanguage}
               onChange={handleSelectChange("replyLanguage")}
-            >
-              <option value="默认">默认</option>
-              <option value="简体中文">简体中文</option>
-              <option value="English">English</option>
-              <option value="日本語">日本語</option>
-            </select>
+              className={styles.selectControl}
+               options={[
+                { value: "默认", label: "默认" },
+                { value: "简体中文", label: "简体中文" },
+                { value: "English", label: "English" },
+                { value: "日本語", label: "日本語" },
+              ]}
+            />
           </div>
           <div className={styles.panelSection}>
             <label className={styles.panelLabel} htmlFor="knowledge-context">
               联想知识库
             </label>
-            <select
-              className={styles.inputControl}
+            <Select
               id="knowledge-context"
               value={settings.knowledgeContext}
               onChange={handleSelectChange("knowledgeContext")}
-            >
-              <option value="默认">默认</option>
-              <option value="产品文档">产品文档</option>
-              <option value="研发规范">研发规范</option>
-              <option value="市场材料">市场材料</option>
-            </select>
+               className={styles.selectControl}
+               options={[
+                { value: "默认", label: "默认" },
+                { value: "产品文档", label: "产品文档" },
+                { value: "研发规范", label: "研发规范" },
+                { value: "市场材料", label: "市场材料" },
+              ]}
+            />
           </div>
           <div className={styles.panelSection}>
             <label className={styles.panelLabel} htmlFor="response-tone">
               响应倾向
             </label>
-            <select
-              className={styles.inputControl}
+            <Select
               id="response-tone"
               value={settings.responseTone}
               onChange={handleSelectChange("responseTone")}
-            >
-              <option value="concise">精简</option>
-              <option value="balanced">均衡</option>
-              <option value="creative">发散</option>
-            </select>
+              className={styles.selectControl}
+              options={[
+                { value: "concise", label: "精简" },
+                { value: "balanced", label: "均衡" },
+                { value: "creative", label: "发散" },
+              ]}
+            />
           </div>
         </div>
 
@@ -184,7 +167,7 @@ const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
               <p>流式响应</p>
               <span>实时输出模型结果</span>
             </div>
-            <Toggle
+            <Switch
               checked={settings.streamingEnabled}
               onChange={(checked) => onChange({ streamingEnabled: checked })}
             />
@@ -194,7 +177,7 @@ const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
               <p>安全模式</p>
               <span>过滤潜在敏感内容</span>
             </div>
-            <Toggle
+            <Switch
               checked={settings.safeModeEnabled}
               onChange={(checked) => onChange({ safeModeEnabled: checked })}
             />
@@ -204,7 +187,7 @@ const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
               <p>自动引用</p>
               <span>回答中包含参考来源</span>
             </div>
-            <Toggle
+            <Switch
               checked={settings.autoCitation}
               onChange={(checked) => onChange({ autoCitation: checked })}
             />
