@@ -1,3 +1,7 @@
+import { useEffect } from "react";
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
 import { Conversation, Message } from "@/types/chat";
 import styles from "./ChatCanvas.module.scss";
 
@@ -51,22 +55,54 @@ const MessageComposer = ({
   onSubmit: () => void;
   disabled: boolean;
 }) => {
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if ((event.metaKey || event.ctrlKey) && event.key === "Enter" && !disabled) {
-      event.preventDefault();
-      onSubmit();
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        // 禁用不需要的扩展，保持简洁的输入体验
+        heading: false,
+        blockquote: false,
+        codeBlock: false,
+        horizontalRule: false,
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+      }),
+      Placeholder.configure({
+        placeholder: "在这里输入消息，支持使用 / 调出命令",
+      }),
+    ],
+    content: value,
+    editorProps: {
+      attributes: {
+        class: styles.composerTextarea,
+      },
+      handleKeyDown: (_view, event) => {
+        // ⌘ + Enter 或 Ctrl + Enter 发送消息
+        if ((event.metaKey || event.ctrlKey) && event.key === "Enter" && !disabled) {
+          event.preventDefault();
+          onSubmit();
+          return true;
+        }
+        return false;
+      },
+    },
+    onUpdate: ({ editor }) => {
+      // 获取纯文本内容同步到外部状态
+      const text = editor.getText();
+      onChange(text);
+    },
+  });
+
+  // 当外部 value 变化时同步编辑器内容（例如发送后清空）
+  useEffect(() => {
+    if (editor && value === "" && editor.getText() !== "") {
+      editor.commands.clearContent();
     }
-  };
+  }, [editor, value]);
 
   return (
     <div className={styles.messageComposer}>
-      <textarea
-        className={styles.composerTextarea}
-        value={value}
-        placeholder="在这里输入消息，支持使用 / 调出命令"
-        onChange={(event) => onChange(event.target.value)}
-        onKeyDown={handleKeyDown}
-      />
+      <EditorContent editor={editor} />
       <div className={styles.composerToolbar}>
         <div className={styles.composerActions}>
           <button type="button" className={styles.ghostButton} aria-label="上传文件">

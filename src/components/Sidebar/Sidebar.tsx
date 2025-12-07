@@ -1,6 +1,7 @@
 import { Conversation } from "@/types/chat";
 import { Input, Button } from "antd";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { PlusOutlined, SearchOutlined, SettingOutlined } from "@ant-design/icons";
+import { Link } from "react-router-dom";
 import styles from "./Sidebar.module.scss";
 
 interface SidebarProps {
@@ -90,6 +91,14 @@ const Sidebar = ({
             <span>尝试调整搜索关键字</span>
           </div>
         )}
+      </div>
+
+
+      <div className={styles.footer}>
+        <Link to="/settings" className={styles.settingsButton}>
+          <SettingOutlined />
+          <span>设置</span>
+        </Link>
       </div>
     </aside>
   );

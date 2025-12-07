@@ -1,0 +1,39 @@
+.settingsPage {
+  padding: 24px;
+  height: 100vh;
+  overflow-y: auto;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+
+  h1 {
+    font-size: 24px;
+    margin-bottom: 24px;
+    font-weight: 600;
+  }
+
+  .section {
+    margin-bottom: 32px;
+    
+    h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+
+      label {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .backButton {
+    margin-bottom: 16px;
+  }
+}

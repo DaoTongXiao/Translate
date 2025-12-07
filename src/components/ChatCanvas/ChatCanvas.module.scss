@@ -165,13 +165,39 @@
   border: none;
   resize: none;
   min-height: 80px;
+  max-height: 200px;
+  overflow-y: auto;
   outline: none;
   font-size: 0.95rem;
   color: $gray-700;
   line-height: 1.5;
+  cursor: text;
+  
+  // 作为编辑器根元素的基本样式
+  caret-color: $primary;
+  
+  &:focus {
+    outline: none;
+  }
 
-  &::placeholder {
+  // 美化滚动条
+  @include subtle-scrollbar(6px);
+
+  // 编辑器内容的段落样式
+  p {
+    margin: 0;
+    min-height: 1.5em; 
+  }
+
+  // Placeholder 样式
+  // 目标是编辑器内部的段落，且该段落有 is-empty 或 is-editor-empty 类
+  p:global(.is-empty):first-child::before,
+  p:global(.is-editor-empty):first-child::before {
+    content: attr(data-placeholder);
     color: $gray-300;
+    float: left;
+    height: 0;
+    pointer-events: none;
   }
 }
 
@@ -201,7 +227,7 @@
   transition: background 0.2s ease, transform 0.1s ease;
 
   &:hover:not(:disabled) {
-    background: darken($primary, 5%);
+    // background: darken($primary, 5%);
     transform: translateY(-1px);
   }
 }

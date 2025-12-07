@@ -1,6 +1,7 @@
 mod translate;
 
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
+use tauri::{Emitter, Manager};
 use translate::excel::process_excel;
 use translate::image::convert_to_ico;
 
@@ -117,6 +118,15 @@ pub fn run() {
             let menu = create_chinese_menu(app)?;
             app.set_menu(menu)?;
             Ok(())
+        })
+        .on_menu_event(|app, event| {
+            // 处理菜单点击事件
+            if event.id().as_ref() == "settings" {
+                // 发送事件到前端，触发导航到设置页面
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.emit("navigate-to-settings", ());
+                }
+            }
         })
         .invoke_handler(tauri::generate_handler![
             process_excel,
