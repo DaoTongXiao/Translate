@@ -1,7 +1,7 @@
 import { Conversation } from "@/types/chat";
 import { Input, Button } from "antd";
 import { PlusOutlined, SearchOutlined, SettingOutlined } from "@ant-design/icons";
-import { Link } from "react-router-dom";
+import { invoke } from "@tauri-apps/api/core";
 import styles from "./Sidebar.module.scss";
 
 interface SidebarProps {
@@ -95,10 +95,10 @@ const Sidebar = ({
 
 
       <div className={styles.footer}>
-        <Link to="/settings" className={styles.settingsButton}>
-          <SettingOutlined />
-          <span>设置</span>
-        </Link>
+        <div className={styles.settingsButton} onClick={() => invoke("open_settings_window")}>
+            <SettingOutlined />
+            <span>设置</span>
+        </div>
       </div>
     </aside>
   );

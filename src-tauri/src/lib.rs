@@ -47,7 +47,7 @@ fn create_chinese_menu(app: &tauri::App) -> Result<Menu<tauri::Wry>, tauri::Erro
         &[
             &PredefinedMenuItem::about(handle, Some("关于 Moro"), None)?,
             &PredefinedMenuItem::separator(handle)?,
-            &MenuItem::with_id(handle, "settings", "偏好设置...", true, Some("Cmd+,"))?,
+            &MenuItem::with_id(handle, "settings", "设置", true, Some("Cmd+,"))?,
             &PredefinedMenuItem::separator(handle)?,
             &PredefinedMenuItem::services(handle, Some("服务"))?,
             &PredefinedMenuItem::separator(handle)?,
@@ -107,6 +107,24 @@ fn create_chinese_menu(app: &tauri::App) -> Result<Menu<tauri::Wry>, tauri::Erro
     Menu::with_items(handle, &[&app_menu, &edit_menu, &window_menu, &help_menu])
 }
 
+#[tauri::command]
+fn open_settings_window(app: tauri::AppHandle) {
+    if let Some(window) = app.get_webview_window("settings") {
+        let _ = window.show();
+        let _ = window.set_focus();
+    } else {
+        let _ = tauri::WebviewWindowBuilder::new(
+            &app,
+            "settings",
+            tauri::WebviewUrl::App("#/settings".into()),
+        )
+        .title("偏好设置")
+        .inner_size(800.0, 600.0)
+        .center()
+        .build();
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     // 初始化应用
@@ -122,27 +140,14 @@ pub fn run() {
         .on_menu_event(|app, event| {
             // 处理菜单点击事件
             if event.id().as_ref() == "settings" {
-                let handle = app.app_handle();
-                if let Some(window) = handle.get_webview_window("settings") {
-                    let _ = window.show();
-                    let _ = window.set_focus();
-                } else {
-                    let _ = tauri::WebviewWindowBuilder::new(
-                        handle,
-                        "settings",
-                        tauri::WebviewUrl::App("#/settings".into()),
-                    )
-                    .title("偏好设置")
-                    .inner_size(800.0, 600.0)
-                    .center()
-                    .build();
-                }
+                open_settings_window(app.app_handle().clone());
             }
         })
         .invoke_handler(tauri::generate_handler![
             process_excel,
             convert_to_ico,
-            open_file
+            open_file,
+            open_settings_window
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

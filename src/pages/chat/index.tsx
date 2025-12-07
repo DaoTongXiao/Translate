@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import styles from "./ChatPage.module.scss";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import ChatCanvas from "@/components/ChatCanvas/ChatCanvas";
@@ -188,7 +189,7 @@ function ChatPage() {
   };
 
   const handleOpenPreferences = () => {
-    console.info("[App] 打开偏好设置");
+    invoke("open_settings_window");
   };
 
   const activeMessages = selectedConversation
