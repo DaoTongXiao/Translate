@@ -1,4 +1,4 @@
-@use "@/styles/tokens" as *;
+@use '@/styles/tokens' as *;
 
 .chatCanvas {
   flex: 1;
@@ -172,10 +172,10 @@
   color: $gray-700;
   line-height: 1.5;
   cursor: text;
-  
+
   // 作为编辑器根元素的基本样式
   caret-color: $primary;
-  
+
   &:focus {
     outline: none;
   }
@@ -186,7 +186,7 @@
   // 编辑器内容的段落样式
   p {
     margin: 0;
-    min-height: 1.5em; 
+    min-height: 1.5em;
   }
 
   // Placeholder 样式
@@ -224,7 +224,9 @@
   align-items: center;
   gap: 6px;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.1s ease;
 
   &:hover:not(:disabled) {
     // background: darken($primary, 5%);
@@ -253,4 +255,3 @@
     padding: 20px;
   }
 }
-

@@ -1,4 +1,4 @@
-@use "@/styles/tokens" as *;
+@use '@/styles/tokens' as *;
 
 .appHeader {
   position: sticky;
@@ -15,7 +15,6 @@
   backdrop-filter: blur(20px);
   z-index: 20;
 }
-
 
 .section {
   @include flex-center;
@@ -41,10 +40,10 @@
   font-weight: 600;
   color: $gray-700;
   white-space: nowrap;
-  
+
   // 添加分隔符
   &::after {
-    content: "·";
+    content: '·';
     margin-left: 8px;
     color: $gray-400;
     font-weight: 400;
@@ -75,7 +74,9 @@
   display: grid;
   place-items: center;
   color: $primary;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 10px 24px rgba(79, 110, 247, 0.25);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 10px 24px rgba(79, 110, 247, 0.25);
 }
 
 .brandTitle {

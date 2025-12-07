@@ -1,7 +1,7 @@
-import { AssistantSettings } from "@/types/chat";
-import { Input, Select, Slider, Switch, Button } from "antd";
-import { SwapOutlined } from "@ant-design/icons";
-import styles from "./AssistantPanel.module.scss";
+import { AssistantSettings } from '@/types/chat';
+import { Input, Select, Slider, Switch, Button } from 'antd';
+import { SwapOutlined } from '@ant-design/icons';
+import styles from './AssistantPanel.module.scss';
 
 interface AssistantPanelProps {
   settings: AssistantSettings;
@@ -9,12 +9,14 @@ interface AssistantPanelProps {
 }
 
 const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
-  const handleInputChange = (field: keyof AssistantSettings) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    onChange({ [field]: e.target.value } as Partial<AssistantSettings>);
-  };
+  const handleInputChange =
+    (field: keyof AssistantSettings) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      onChange({ [field]: e.target.value } as Partial<AssistantSettings>);
+    };
 
   const handleSelectChange = (field: keyof AssistantSettings) => (value: string | number) => {
-     onChange({ [field]: value } as Partial<AssistantSettings>);
+    onChange({ [field]: value } as Partial<AssistantSettings>);
   };
 
   const handleSliderChange = (value: number) => {
@@ -39,7 +41,7 @@ const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
           <Input
             id="assistant-id"
             value={settings.identifier}
-            onChange={handleInputChange("identifier")}
+            onChange={handleInputChange('identifier')}
             className={styles.inputControl}
           />
         </div>
@@ -62,7 +64,7 @@ const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
             id="system-prompt"
             rows={3}
             value={settings.systemPrompt}
-            onChange={handleInputChange("systemPrompt")}
+            onChange={handleInputChange('systemPrompt')}
             placeholder="提示助手在本轮会话中的行为，例如“聚焦产品策略”。"
             className={styles.inputControl}
           />
@@ -99,13 +101,13 @@ const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
             <Select
               id="max-output"
               value={settings.maxOutputTokens}
-              onChange={handleSelectChange("maxOutputTokens")}
+              onChange={handleSelectChange('maxOutputTokens')}
               className={styles.selectControl}
               options={[
-                { value: 1024, label: "默认" },
-                { value: 2048, label: "2048 tokens" },
-                { value: 4096, label: "4096 tokens" },
-                { value: 8192, label: "8192 tokens" },
+                { value: 1024, label: '默认' },
+                { value: 2048, label: '2048 tokens' },
+                { value: 4096, label: '4096 tokens' },
+                { value: 8192, label: '8192 tokens' },
               ]}
             />
           </div>
@@ -116,13 +118,13 @@ const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
             <Select
               id="reply-language"
               value={settings.replyLanguage}
-              onChange={handleSelectChange("replyLanguage")}
+              onChange={handleSelectChange('replyLanguage')}
               className={styles.selectControl}
-               options={[
-                { value: "默认", label: "默认" },
-                { value: "简体中文", label: "简体中文" },
-                { value: "English", label: "English" },
-                { value: "日本語", label: "日本語" },
+              options={[
+                { value: '默认', label: '默认' },
+                { value: '简体中文', label: '简体中文' },
+                { value: 'English', label: 'English' },
+                { value: '日本語', label: '日本語' },
               ]}
             />
           </div>
@@ -133,13 +135,13 @@ const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
             <Select
               id="knowledge-context"
               value={settings.knowledgeContext}
-              onChange={handleSelectChange("knowledgeContext")}
-               className={styles.selectControl}
-               options={[
-                { value: "默认", label: "默认" },
-                { value: "产品文档", label: "产品文档" },
-                { value: "研发规范", label: "研发规范" },
-                { value: "市场材料", label: "市场材料" },
+              onChange={handleSelectChange('knowledgeContext')}
+              className={styles.selectControl}
+              options={[
+                { value: '默认', label: '默认' },
+                { value: '产品文档', label: '产品文档' },
+                { value: '研发规范', label: '研发规范' },
+                { value: '市场材料', label: '市场材料' },
               ]}
             />
           </div>
@@ -150,12 +152,12 @@ const AssistantPanel = ({ settings, onChange }: AssistantPanelProps) => {
             <Select
               id="response-tone"
               value={settings.responseTone}
-              onChange={handleSelectChange("responseTone")}
+              onChange={handleSelectChange('responseTone')}
               className={styles.selectControl}
               options={[
-                { value: "concise", label: "精简" },
-                { value: "balanced", label: "均衡" },
-                { value: "creative", label: "发散" },
+                { value: 'concise', label: '精简' },
+                { value: 'balanced', label: '均衡' },
+                { value: 'creative', label: '发散' },
               ]}
             />
           </div>

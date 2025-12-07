@@ -1,8 +1,8 @@
-import { Conversation } from "@/types/chat";
-import { Input, Button } from "antd";
-import { PlusOutlined, SearchOutlined, SettingOutlined } from "@ant-design/icons";
-import { invoke } from "@tauri-apps/api/core";
-import styles from "./Sidebar.module.scss";
+import { Conversation } from '@/types/chat';
+import { Input, Button } from 'antd';
+import { PlusOutlined, SearchOutlined, SettingOutlined } from '@ant-design/icons';
+import { invoke } from '@tauri-apps/api/core';
+import styles from './Sidebar.module.scss';
 
 interface SidebarProps {
   conversations: Conversation[];
@@ -28,7 +28,14 @@ const Sidebar = ({
       <div className={styles.topBar}>
         <div className={styles.titleGroup}>
           <span className={styles.appIcon} aria-hidden>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <circle cx="12" cy="12" r="9" />
               <path d="M12 7V13L15 15" strokeLinecap="round" />
             </svg>
@@ -51,10 +58,10 @@ const Sidebar = ({
         />
       </div>
 
-      <Button 
-        type="primary" 
-        block 
-        icon={<PlusOutlined />} 
+      <Button
+        type="primary"
+        block
+        icon={<PlusOutlined />}
         onClick={onCreateConversation}
         className={styles.newChatButton}
       >
@@ -67,16 +74,23 @@ const Sidebar = ({
             <button
               key={conversation.id}
               type="button"
-              className={`${styles.conversationItem} ${conversation.id === selectedConversationId ? styles.conversationItemActive : ""}`}
+              className={`${styles.conversationItem} ${conversation.id === selectedConversationId ? styles.conversationItemActive : ''}`}
               onClick={() => onSelectConversation(conversation.id)}
             >
               <div className={styles.conversationHeader}>
                 <span className={styles.conversationTitle}>{conversation.title}</span>
                 {conversation.isPinned && (
                   <span className={styles.conversationPin} aria-label="已置顶">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                       <path d="M17 3L21 7L14 14L10 14L10 10L17 3Z" />
-                       <path d="M7 21L11 17" strokeLinecap="round" />
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path d="M17 3L21 7L14 14L10 14L10 10L17 3Z" />
+                      <path d="M7 21L11 17" strokeLinecap="round" />
                     </svg>
                   </span>
                 )}
@@ -93,11 +107,10 @@ const Sidebar = ({
         )}
       </div>
 
-
       <div className={styles.footer}>
-        <div className={styles.settingsButton} onClick={() => invoke("open_settings_window")}>
-            <SettingOutlined />
-            <span>设置</span>
+        <div className={styles.settingsButton} onClick={() => invoke('open_settings_window')}>
+          <SettingOutlined />
+          <span>设置</span>
         </div>
       </div>
     </aside>

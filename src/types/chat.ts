@@ -6,7 +6,7 @@ export interface Conversation {
   isPinned?: boolean;
 }
 
-export type MessageRole = "user" | "assistant";
+export type MessageRole = 'user' | 'assistant';
 
 export interface Message {
   id: string;
@@ -21,7 +21,7 @@ export interface AssistantSettings {
   systemPrompt: string;
   temperature: number;
   maxOutputTokens: number;
-  responseTone: "concise" | "balanced" | "creative";
+  responseTone: 'concise' | 'balanced' | 'creative';
   replyLanguage: string;
   autoCitation: boolean;
   streamingEnabled: boolean;

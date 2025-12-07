@@ -1,4 +1,4 @@
-@use "@/styles/tokens" as *;
+@use '@/styles/tokens' as *;
 
 .assistantPanel {
   background: $surface;
@@ -73,8 +73,6 @@
   color: $gray-500;
 }
 
-
-
 .selectControl {
   width: 100%;
 }
@@ -111,7 +109,7 @@
   border: 1px dashed rgba($gray-500, 0.3);
 }
 
-.emojiSelector span[role="img"] {
+.emojiSelector span[role='img'] {
   font-size: 1.5rem;
 }
 
