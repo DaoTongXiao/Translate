@@ -1,21 +1,11 @@
-import { Button, Switch, Select } from "antd";
-import { ArrowLeftOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { Switch, Select, Button } from "antd";
+
 import styles from "./Settings.module.scss";
 
 const SettingsPage = () => {
-  const navigate = useNavigate();
 
   return (
     <div className={styles.settingsPage}>
-      <Button 
-        type="text" 
-        icon={<ArrowLeftOutlined />} 
-        onClick={() => navigate(-1)}
-        className={styles.backButton}
-      >
-        返回
-      </Button>
       
       <h1>设置</h1>
 

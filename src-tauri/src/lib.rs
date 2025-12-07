@@ -1,7 +1,7 @@
 mod translate;
 
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
-use tauri::{Emitter, Manager};
+use tauri::Manager;
 use translate::excel::process_excel;
 use translate::image::convert_to_ico;
 
@@ -122,9 +122,20 @@ pub fn run() {
         .on_menu_event(|app, event| {
             // 处理菜单点击事件
             if event.id().as_ref() == "settings" {
-                // 发送事件到前端，触发导航到设置页面
-                if let Some(window) = app.get_webview_window("main") {
-                    let _ = window.emit("navigate-to-settings", ());
+                let handle = app.app_handle();
+                if let Some(window) = handle.get_webview_window("settings") {
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                } else {
+                    let _ = tauri::WebviewWindowBuilder::new(
+                        handle,
+                        "settings",
+                        tauri::WebviewUrl::App("#/settings".into()),
+                    )
+                    .title("偏好设置")
+                    .inner_size(800.0, 600.0)
+                    .center()
+                    .build();
                 }
             }
         })

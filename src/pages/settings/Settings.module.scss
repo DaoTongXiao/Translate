@@ -1,6 +1,6 @@
 .settingsPage {
   padding: 24px;
-  height: 100vh;
+  height: 100%;
   overflow-y: auto;
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -33,7 +33,5 @@
     }
   }
 
-  .backButton {
-    margin-bottom: 16px;
-  }
+
 }
