@@ -40,7 +40,7 @@ const Sidebar = ({
               <path d="M12 7V13L15 15" strokeLinecap="round" />
             </svg>
           </span>
-          <div>
+          <div className={styles.titleText}>
             <p className={styles.title}>对话</p>
             <p className={styles.subtitle}>快速切换会话</p>
           </div>

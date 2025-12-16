@@ -10,7 +10,7 @@ import prettierFn from 'eslint-config-prettier';
 export default defineConfig([
   { ignores: ['dist', 'src-tauri'] },
   js.configs.recommended,
-  tseslint.configs.recommended,
+  ...tseslint.configs.recommended,
   {
     files: ['**/*.{ts,tsx}'],
     languageOptions: {

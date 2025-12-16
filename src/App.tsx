@@ -3,7 +3,7 @@ import { ConfigProvider } from 'antd';
 
 import ChatPage from '@/pages/chat';
 import SettingsPage from '@/pages/settings';
-import '@/styles/global.scss';
+import '@/assets/styles/global.scss';
 
 function App() {
   return (
