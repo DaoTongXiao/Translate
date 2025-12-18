@@ -1,9 +1,13 @@
 mod translate;
+mod ai;
 
+use std::sync::Arc;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
 use tauri::Manager;
 use translate::excel::process_excel;
 use translate::image::convert_to_ico;
+
+type ChromaServerState = Arc<tokio::sync::Mutex<Option<Arc<ai::chromadb_server::ChromaServer>>>>;
 
 // 打开文件函数
 #[tauri::command]
@@ -135,6 +139,10 @@ pub fn run() {
             // 设置中文菜单
             let menu = create_chinese_menu(app)?;
             app.set_menu(menu)?;
+            
+            // 初始化 ChromaDB 服务器状态
+            app.manage::<ChromaServerState>(Arc::new(tokio::sync::Mutex::new(None)));
+            
             Ok(())
         })
         .on_menu_event(|app, event| {
@@ -147,7 +155,13 @@ pub fn run() {
             process_excel,
             convert_to_ico,
             open_file,
-            open_settings_window
+            open_settings_window,
+            ai::chroma_start_server,
+            ai::chroma_stop_server,
+            ai::chroma_create_collection,
+            ai::chroma_add_documents,
+            ai::chroma_query,
+            ai::chroma_delete_collection
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
