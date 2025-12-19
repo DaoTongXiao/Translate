@@ -19,34 +19,43 @@ interface MessageBubbleProps {
 
 const EmptyState = () => (
   <div className={styles.emptyState}>
-    <div className={styles.emptyIcon} aria-hidden>
-      <svg
-        width="40"
-        height="40"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      >
-        <path d="M21 15V5C21 3.89543 20.1046 3 19 3H5C3.89543 3 3 3.89543 3 5V15C3 16.1046 3.89543 17 5 17H8V21L13 17H19C20.1046 17 21 16.1046 21 15Z" />
-      </svg>
+    <div className={styles.logoPlace}>
+        <AIIcon size={40} />
     </div>
-    <p className={styles.emptyTitle}>这里暂时还没有消息</p>
-    <p className={styles.emptySubtitle}>输入内容并按 ⌘ + Enter 发送</p>
+    <h3>How can I help you today?</h3>
   </div>
 );
 
-const MessageBubble = ({ message }: MessageBubbleProps) => {
-  const bubbleClassName = `${styles.messageBubble} ${
-    message.role === 'user' ? styles.messageBubbleUser : styles.messageBubbleAssistant
-  }`;
+import MarkdownMessage from './MarkdownMessage';
+import AIIcon from '@/components/icons/AIIcon';
+import { UserOutlined, SendOutlined } from '@ant-design/icons';
 
+const MessageBubble = ({ message }: MessageBubbleProps) => {
+  const isUser = message.role === 'user';
+  
   return (
-    <div className={bubbleClassName}>
-      <div className={styles.messageBody}>
-        <p>{message.content}</p>
-      </div>
-      <span className={styles.timestamp}>{message.timestamp}</span>
+    <div className={`${styles.messageRow} ${isUser ? styles.userRow : styles.assistantRow}`}>
+       {/* Avatar */}
+       <div className={`${styles.avatar} ${isUser ? styles.userAvatar : styles.assistantAvatar}`}>
+          {isUser ? (
+            <UserOutlined />
+          ) : (
+            <AIIcon size={20} />
+          )}
+       </div>
+
+       {/* Content */}
+       <div className={styles.messageContent}>
+          {!isUser && <span className={styles.senderName}>AI Assistant</span>}
+          <div className={`${styles.messageBubble} ${isUser ? styles.userBubble : styles.assistantBubble}`}>
+             {isUser ? (
+                 <p style={{margin: 0}}>{message.content}</p>
+             ) : (
+                 <MarkdownMessage content={message.content} role="assistant" />
+             )}
+          </div>
+          {/* <span className={styles.timestamp}>{message.timestamp}</span> */}
+       </div>
     </div>
   );
 };
@@ -108,57 +117,21 @@ const MessageComposer = ({
   }, [editor, value]);
 
   return (
-    <div className={styles.messageComposer}>
-      <EditorContent editor={editor} />
-      <div className={styles.composerToolbar}>
-        <div className={styles.composerActions}>
-          <button type="button" className={styles.ghostButton} aria-label="上传文件">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M21 15V18C21 19.6569 19.6569 21 18 21H6C4.34315 21 3 19.6569 3 18V15" />
-              <path d="M7 10L12 5L17 10" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M12 5V16" strokeLinecap="round" />
-            </svg>
-          </button>
-          <button type="button" className={styles.ghostButton} aria-label="插入指令">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M8 5L3 12L8 19" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M16 5L21 12L16 19" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <button type="button" className={styles.ghostButton} aria-label="语音输入">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M12 3C10.3431 3 9 4.34315 9 6V12C9 13.6569 10.3431 15 12 15C13.6569 15 15 13.6569 15 12V6C15 4.34315 13.6569 3 12 3Z" />
-              <path d="M5 10V12C5 15.866 8.13401 19 12 19C15.866 19 19 15.866 19 12V10" />
-              <path d="M12 19V22" />
-            </svg>
-          </button>
+    <div className={styles.messageComposerWrapper}>
+        <div className={styles.messageComposer}>
+          <EditorContent editor={editor} />
+          <div className={styles.composerToolbar}>
+            <div className={styles.composerActions}>
+              {/* Add back tool buttons if needed, simplified for Cherry look */}
+              <button type="button" className={styles.ghostButton} aria-label="Attachments">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+              </button>
+            </div>
+            <button type="button" className={styles.sendButton} onClick={onSubmit} disabled={disabled || !value.trim()}>
+               <SendOutlined />
+            </button>
+          </div>
         </div>
-        <button type="button" className={styles.sendButton} onClick={onSubmit} disabled={disabled}>
-          发送
-          <span className={styles.shortcutHint}>⌘ ↩</span>
-        </button>
-      </div>
     </div>
   );
 };

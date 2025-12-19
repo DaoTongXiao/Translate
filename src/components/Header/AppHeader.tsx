@@ -8,7 +8,6 @@ import {
   LayoutOutlined,
 } from '@ant-design/icons';
 import styles from './AppHeader.module.scss';
-import { Conversation } from '@/types/chat';
 
 interface AppHeaderProps {
   onRefresh: () => void;
@@ -18,8 +17,9 @@ interface AppHeaderProps {
   toggleLeftSidebar: () => void;
   isRightSidebarOpen: boolean;
   toggleRightSidebar: () => void;
-  conversation?: Conversation;
+  activeModelName?: string;
 }
+
 
 const AppHeader = ({
   onRefresh,
@@ -29,7 +29,7 @@ const AppHeader = ({
   toggleLeftSidebar,
   isRightSidebarOpen,
   toggleRightSidebar,
-  conversation,
+  activeModelName,
 }: AppHeaderProps) => {
   return (
     <header className={styles.appHeader}>
@@ -45,8 +45,7 @@ const AppHeader = ({
 
         {/* 模型信息和会话标题 */}
         <div className={styles.modelInfo}>
-          <p className={styles.modelTitle}>OpenAI · GPT-4.1</p>
-          <p className={styles.modelSubtitle}>{conversation ? conversation.title : '空白对话'}</p>
+          <p className={styles.modelTitle}>{activeModelName || 'Select a Model'}</p>
         </div>
         <span className={styles.statusPill}>
           <span className={styles.statusIndicator} aria-hidden />

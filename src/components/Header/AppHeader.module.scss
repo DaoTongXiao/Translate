@@ -34,28 +34,6 @@
   margin-left: 8px;
 }
 
-.modelTitle {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: $gray-700;
-  white-space: nowrap;
-
-  // 添加分隔符
-  &::after {
-    content: '·';
-    margin-left: 8px;
-    color: $gray-400;
-    font-weight: 400;
-  }
-}
-
-.modelSubtitle {
-  margin: 0;
-  color: $gray-500;
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
 
 .center {
   gap: 18px;

@@ -28,3 +28,21 @@ export interface AssistantSettings {
   safeModeEnabled: boolean;
   knowledgeContext: string;
 }
+
+export interface Provider {
+  id: string;
+  name: string;
+  baseUrl: string;
+  apiKey: string;
+  icon: string;
+  createdAt: string;
+}
+
+export interface Model {
+  id: string;
+  providerId: string;
+  name: string;
+  modelKey: string;
+  isActive: boolean;
+  createdAt: string;
+}

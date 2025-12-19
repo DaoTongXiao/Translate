@@ -2,199 +2,318 @@
 
 .chatCanvas {
   flex: 1;
-  padding: 24px 32px;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 20px;
   min-height: 0;
   overflow: hidden;
-  background: white;
+  background: white; // Cherry Studio often uses clean white or very light gray
+  position: relative;
 }
 
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 20px;
-}
-
-.headerLeft {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.modelInfo {
-  display: flex;
-  flex-direction: column;
-}
-
-.modelTitle {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: $gray-700;
-}
-
-.modelSubtitle {
-  margin: 2px 0 0;
-  color: $gray-500;
-  font-size: 0.85rem;
-}
-
-.statusPill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: $status-online;
-  background: $status-online-bg;
-}
-
-.statusIndicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: $status-online;
-  box-shadow: 0 0 0 3px rgba(60, 203, 156, 0.18);
-}
-
-.headerActions {
-  display: flex;
-  gap: 6px;
-}
-
-.ghostButton {
-  @include ghost-icon-button;
-}
-
+// Scroller area
 .chatScroller {
   flex: 1;
-  // Remove card styling to make it seamless
-  border-radius: 0;
   display: flex;
   flex-direction: column;
-  padding: 0 20px; // Reduce side padding if needed, or keep it spacious
-  gap: 24px;
+  padding: 24px 0; // Vertical padding only, horiz handled by container
+  gap: 32px; // More breathing room between message groups
   min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   background: white;
-  border: none;
-  // border: 1px solid rgba($gray-500, 0.08);
 
   @include subtle-scrollbar(6px);
 }
 
-.emptyState {
-  margin: auto;
-  text-align: center;
-  color: $gray-500;
+// Container for width constraint (centered like Cherry)
+.messageRow {
+  display: flex;
+  width: 100%;
+  max-width: 900px; // Cherry Studio usually limits width for readability
+  margin: 0 auto;
+  padding: 0 24px;
+  gap: 16px;
+
+  &.userRow {
+    flex-direction: row-reverse;
+  }
 }
 
-.emptyIcon {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  background: #f1f5f9;
+// Avatar Styles
+.avatar {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f0f0f0;
   display: grid;
   place-items: center;
-  margin: 0 auto 16px;
-  color: $gray-300;
+  font-size: 1.2rem;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
-.emptyTitle {
-  font-weight: 600;
-  margin-bottom: 4px;
-  color: $gray-700;
+.assistantAvatar {
+  background: white;
+  border: 1px solid $gray-200;
+  color: $primary;
 }
 
-.emptySubtitle {
-  font-size: 0.85rem;
-  color: $gray-300;
-}
-
-.messageBubble {
-  max-width: 70%;
-  padding: 12px 16px;
-  border-radius: 16px;
-  background: #f1f5f9;
-  display: inline-flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.messageBubbleUser {
-  align-self: flex-end;
+.userAvatar {
   background: $primary;
   color: white;
-  border-radius: 16px 16px 4px 16px;
 }
 
-.messageBubbleAssistant {
-  align-self: flex-start;
-  border-radius: 16px 16px 16px 4px;
+// Message Content Area
+.messageContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: calc(100% - 100px); // Allow mostly full width minus avatars
+  min-width: 0; // For text overflow
 }
 
-.messageBody {
-  margin: 0;
-  line-height: 1.5;
+.senderName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: $gray-700;
+  margin-bottom: 2px;
 }
 
-.timestamp {
-  font-size: 0.7rem;
-  color: inherit;
-  opacity: 0.6;
+// Bubble Styling
+// Cherry Studio style:
+// User: Colored bubble (often blue/purple gradient or solid), white text
+// Assistant: No bubble background (or very subtle), clear text, looking like a document
+.messageBubble {
+  padding: 0;
+  border-radius: 12px;
+  position: relative;
+
+  &.userBubble {
+    padding: 10px 16px;
+    background: $primary; // Or gradient
+    color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba($primary, 0.2);
+  }
+
+  &.assistantBubble {
+    background: transparent;
+    color: $gray-800;
+    padding: 0; // Markdown takes space
+    width: 100%;
+  }
+}
+
+// Markdown Styles
+.markdownContent {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: $gray-800;
+
+  &.userMarkdown {
+    color: white;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  // Common typography
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+    line-height: 1.3;
+    color: $gray-900;
+  }
+  h1 {
+    font-size: 1.6em;
+    border-bottom: 1px solid $gray-200;
+    padding-bottom: 0.3em;
+  }
+  h2 {
+    font-size: 1.4em;
+  }
+  h3 {
+    font-size: 1.2em;
+  }
+
+  p {
+    margin: 0.8em 0;
+    &:first-child {
+      margin-top: 0;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  ul,
+  ol {
+    padding-left: 1.5em;
+    margin: 0.8em 0;
+
+    li {
+      margin: 0.4em 0;
+      padding-left: 0.2em;
+    }
+  }
+
+  a {
+    color: $primary;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    &:hover {
+      color: darken($primary, 10%);
+    }
+  }
+
+  blockquote {
+    border-left: 4px solid $gray-300;
+    padding-left: 1em;
+    margin: 1em 0;
+    color: $gray-600;
+    font-style: italic;
+  }
+
+  // Inline code
+  code {
+    background: rgba($gray-200, 0.6);
+    padding: 0.2em 0.4em;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.9em;
+  }
+
+  // Tables
+  .tableWrapper {
+    overflow-x: auto;
+    margin: 1em 0;
+    border-radius: 8px;
+    border: 1px solid $gray-200;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95em;
+
+    th,
+    td {
+      padding: 10px 14px;
+      border: 1px solid $gray-200;
+    }
+
+    th {
+      background: $gray-50;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+  }
+}
+
+// User side markdown specific overrides to ensure readable on blue bg
+.userMarkdown {
+  code {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+  }
+  a {
+    color: white;
+  }
+}
+
+// Code Block (Highlighter wrapper)
+.codeBlockWrapper {
+  margin: 1.2em 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid $gray-200;
+  background: #282c34; // Match prism style background roughly
+
+  .codeHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 12px;
+    background: #21252b;
+    color: #abb2bf;
+    font-size: 0.8rem;
+    font-family: sans-serif;
+  }
+}
+
+// Input Area (Composer) - Floating at bottom
+.messageComposerWrapper {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 24px;
+  padding: 0 24px;
 }
 
 .messageComposer {
-  margin-top: 10px;
   border-radius: 20px;
-  border: 1px solid rgba($gray-500, 0.1);
+  border: 1px solid $gray-200;
   padding: 16px 20px;
   background: white;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04); // Floating effect
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08); // Floating effect
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+
+  &:focus-within {
+    border-color: $gray-300;
+    box-shadow: 0 12px 48px -10px rgba(0, 0, 0, 0.12);
+  }
 }
 
 .composerTextarea {
   border: none;
   resize: none;
-  min-height: 80px;
+  min-height: 24px; // Starts small
   max-height: 200px;
   overflow-y: auto;
   outline: none;
-  font-size: 0.95rem;
-  color: $gray-700;
-  line-height: 1.5;
-  cursor: text;
+  font-size: 1rem;
+  color: $gray-800;
+  line-height: 1.6;
 
-  // 作为编辑器根元素的基本样式
   caret-color: $primary;
 
   &:focus {
     outline: none;
   }
 
-  // 美化滚动条
-  @include subtle-scrollbar(6px);
+  @include subtle-scrollbar(4px);
 
-  // 编辑器内容的段落样式
   p {
     margin: 0;
     min-height: 1.5em;
   }
 
-  // Placeholder 样式
-  // 目标是编辑器内部的段落，且该段落有 is-empty 或 is-editor-empty 类
   p:global(.is-empty):first-child::before,
   p:global(.is-editor-empty):first-child::before {
     content: attr(data-placeholder);
-    color: $gray-300;
+    color: $gray-400;
     float: left;
     height: 0;
     pointer-events: none;
@@ -205,53 +324,87 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid transparent; // Reserve space or add separator?
 }
 
 .composerActions {
   display: flex;
-  gap: 4px;
+  gap: 8px;
+}
+
+.ghostButton {
+  @include ghost-icon-button;
+  color: $gray-500;
+  &:hover {
+    color: $gray-700;
+    background: $gray-100;
+  }
 }
 
 .sendButton {
   border: none;
   background: $primary;
   color: white;
-  padding: 8px 16px;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
   cursor: pointer;
-  transition:
-    background 0.2s ease,
-    transform 0.1s ease;
+  transition: transform 0.1s;
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
 
   &:hover:not(:disabled) {
-    // background: darken($primary, 5%);
-    transform: translateY(-1px);
+    background: darken($primary, 5%);
+  }
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+  &:disabled {
+    background: $gray-200;
+    color: $gray-400;
+    cursor: default;
   }
 }
 
-.sendButton:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+// Empty State
+.emptyState {
+  margin: auto;
+  text-align: center;
+  color: $gray-400;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
 
-.shortcutHint {
-  padding: 2px 6px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.2);
-  font-size: 0.7rem;
-}
+  .logoPlace {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #e0e7ff 0%, #ede9fe 100%);
+    color: $primary;
+    display: grid;
+    place-items: center;
+    margin-bottom: 8px;
 
-@media (max-width: 1280px) {
-  .chatCanvas {
-    padding: 20px;
+    svg {
+      width: 40px;
+      height: 40px;
+    }
   }
 
-  .chatScroller {
-    padding: 20px;
+  h3 {
+    font-size: 1.2rem;
+    margin: 0;
+    color: $gray-800;
+  }
+  p {
+    font-size: 0.95rem;
   }
 }

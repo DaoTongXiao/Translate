@@ -1,5 +1,6 @@
-mod translate;
 mod ai;
+mod database;
+mod translate;
 
 use std::sync::Arc;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem, Submenu};
@@ -139,10 +140,13 @@ pub fn run() {
             // 设置中文菜单
             let menu = create_chinese_menu(app)?;
             app.set_menu(menu)?;
-            
+
+            // 初始化数据库
+            database::init_db(app.handle()).expect("初始化数据库失败");
+
             // 初始化 ChromaDB 服务器状态
             app.manage::<ChromaServerState>(Arc::new(tokio::sync::Mutex::new(None)));
-            
+
             Ok(())
         })
         .on_menu_event(|app, event| {
@@ -161,7 +165,30 @@ pub fn run() {
             ai::chroma_create_collection,
             ai::chroma_add_documents,
             ai::chroma_query,
-            ai::chroma_delete_collection
+            ai::chroma_delete_collection,
+            // Database commands
+            database::create_conversation,
+            database::save_message,
+            database::get_history,
+            database::get_conversation_list,
+            database::delete_conversation,
+            database::update_conversation_title,
+            database::toggle_pin_conversation,
+            // Provider & Model commands
+            database::create_provider,
+            database::get_providers,
+            database::delete_provider,
+            database::create_model,
+            database::get_models_by_provider,
+            database::get_all_models,
+            database::delete_model,
+            database::set_active_model,
+            database::get_all_models,
+            database::delete_model,
+            database::set_active_model,
+            database::get_active_model,
+            // LLM
+            ai::llm::chat
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
